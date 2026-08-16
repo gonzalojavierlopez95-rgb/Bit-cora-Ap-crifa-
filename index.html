@@ -1,0 +1,3669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content">
+<title>Bitácora Apócrifa</title>
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0908">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bitácora">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Great+Vibes&family=Pirata+One&display=swap');
+
+  :root{
+    --void:#0b0908;
+    --void-2:#161210;
+    --parchment:#e7ddc4;
+    --parchment-dim:#b8ab8c;
+    --blood:#7a1414;
+    --blood-bright:#a52424;
+    --gold:#c9a227;
+    --gold-dim:#7a611c;
+    --line:#3a322a;
+  }
+  body.theme-light{
+    --void:#efe4c8;
+    --void-2:#f8f0dc;
+    --parchment:#2c2013;
+    --parchment-dim:#6e5c3e;
+    --blood:#8a1a1a;
+    --blood-bright:#a52424;
+    --gold:#8a6a14;
+    --gold-dim:#a9871f;
+    --line:#cbb98c;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%; overflow:hidden; touch-action:pan-y;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(122,20,20,0.20), transparent 55%),
+      radial-gradient(ellipse at 10% 110%, rgba(122,20,20,0.12), transparent 50%),
+      var(--void);
+    color:var(--parchment);
+    font-family:'EB Garamond', serif;
+    height:100vh;
+    height:100dvh;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .book{
+    max-width:640px;
+    margin:0 auto;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    padding:1.1rem 0.5rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
+    position:relative;
+  }
+
+  header{text-align:center; margin-bottom:0.7rem; flex-shrink:0;}
+  h1{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:1.8rem;
+    letter-spacing:0.08em;
+    margin:0;
+    color:var(--parchment);
+    text-shadow:0 0 18px rgba(165,36,36,0.35);
+  }
+  header .sub{
+    font-family:'Cinzel', serif;
+    font-size:0.65rem;
+    letter-spacing:0.35em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-top:0.35rem;
+  }
+  header::after{
+    content:'';
+    display:block;
+    width:120px;
+    height:1px;
+    margin:0.6rem auto 0;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .theme-toggle{
+    all:unset;
+    cursor:pointer;
+    position:absolute;
+    top:0.9rem;
+    right:0.55rem;
+    z-index:15;
+    width:2.05rem;
+    height:2.05rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--void-2);
+    border:1.5px solid var(--gold);
+    border-radius:50%;
+    color:var(--gold);
+    transition:box-shadow 0.25s ease, transform 0.15s ease;
+  }
+  .theme-toggle:hover{
+    box-shadow:0 0 8px rgba(201,162,39,0.35);
+  }
+  .theme-toggle:active{transform:scale(0.92);}
+  .theme-toggle .icon-stage{
+    position:relative;
+    width:1.3rem;
+    height:1.3rem;
+  }
+  .theme-toggle svg{
+    position:absolute;
+    top:0;
+    left:0;
+    width:1.3rem;
+    height:1.3rem;
+    display:block;
+    opacity:0;
+    transform:scale(0.5) rotate(-90deg);
+    transition:opacity 0.3s ease, transform 0.35s ease;
+    pointer-events:none;
+  }
+  .theme-toggle svg.icon-visible{
+    opacity:1;
+    transform:scale(1) rotate(0deg);
+  }
+
+  input, textarea{
+    font-family:'EB Garamond', serif;
+    background:var(--void-2);
+    border:1px solid var(--line);
+    color:var(--parchment);
+    border-radius:3px;
+    outline:none;
+  }
+  input::placeholder, textarea::placeholder{color:var(--parchment-dim); font-style:italic;}
+  input:focus, textarea:focus{border-color:var(--gold);}
+
+  button{font-family:inherit;}
+
+  /* ---------- vista lista ---------- */
+  #viewList{display:flex; flex-direction:column; flex:1; min-height:0;}
+  .search-wrap{position:relative; flex-shrink:0; margin-bottom:0.8rem;}
+  .search-wrap svg{
+    position:absolute; left:0.7rem; top:50%; transform:translateY(-50%);
+    width:1rem; height:1rem; color:var(--gold-dim); pointer-events:none;
+  }
+  #search{width:100%; padding:0.7rem 0.8rem 0.7rem 2.1rem; font-size:0.85rem;}
+
+  #list{flex:1; min-height:0; overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none;}
+  #list::-webkit-scrollbar{display:none;}
+
+  .note-item{
+    display:flex;
+    gap:0.7rem;
+    padding:0.9rem 0.3rem;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    position:relative;
+  }
+  .note-item:active{background:rgba(201,162,39,0.06);}
+  .note-item .bar{
+    width:2px;
+    flex-shrink:0;
+    background:linear-gradient(var(--gold), transparent);
+    border-radius:2px;
+  }
+  .note-item .content{min-width:0; flex:1;}
+  .note-title{
+    font-family:'Cinzel', serif;
+    font-weight:600;
+    font-size:1rem;
+    color:var(--parchment);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:inline-block;
+    max-width:calc(100% - 2.8rem);
+    vertical-align:top;
+    padding:0.05rem 1.4rem 0.05rem 0.3rem;
+    margin:-0.05rem -0.3rem;
+    border-radius:2px;
+  }
+  .note-preview{
+    font-size:0.9rem;
+    color:var(--parchment-dim);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    margin-top:0.2rem;
+    padding-right:2.8rem;
+  }
+  .note-date{
+    font-family:'Cinzel', serif;
+    font-size:0.6rem;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--gold-dim);
+    margin-top:0.55rem;
+  }
+
+  .item-menu-btn{
+    all:unset;
+    cursor:pointer;
+    position:absolute;
+    top:50%;
+    right:0.2rem;
+    transform:translateY(-50%);
+    width:2.1rem;
+    height:2.1rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--gold);
+    background:rgba(201,162,39,0.1);
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .item-menu-btn:active{background:rgba(201,162,39,0.22); color:var(--gold);}
+  .item-menu-btn svg{width:1.3rem; height:1.3rem;}
+
+  .item-menu{
+    display:none;
+    position:absolute;
+    top:calc(50% + 1.3rem);
+    right:0.2rem;
+    background:var(--void-2);
+    border:1px solid var(--gold-dim);
+    border-radius:4px;
+    min-width:9rem;
+    z-index:30;
+    box-shadow:0 8px 20px rgba(0,0,0,0.55);
+    overflow:hidden;
+  }
+  .item-menu.show{display:block;}
+  .item-menu-option{
+    all:unset;
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    padding:0.7rem 0.9rem;
+    font-family:'Cinzel', serif;
+    font-size:0.72rem;
+    letter-spacing:0.04em;
+    color:var(--parchment);
+    cursor:pointer;
+  }
+  .item-menu-option:active{background:rgba(201,162,39,0.1);}
+  .item-menu-option + .item-menu-option{border-top:1px solid var(--line);}
+  .item-menu-option.danger{color:var(--blood-bright);}
+
+  .empty{
+    text-align:center;
+    color:var(--parchment-dim);
+    font-style:italic;
+    padding:2.6rem 1rem;
+    border:1px dashed var(--line);
+    margin-top:1rem;
+  }
+
+  .fab{
+    all:unset;
+    cursor:pointer;
+    position:absolute;
+    right:1.2rem;
+    bottom:calc(1.2rem + env(safe-area-inset-bottom, 0px));
+    width:2.9rem;
+    height:2.9rem;
+    border-radius:50%;
+    background:var(--blood);
+    border:1px solid var(--blood-bright);
+    color:var(--parchment);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 18px rgba(122,20,20,0.55);
+    z-index:20;
+  }
+  .fab:active{background:var(--blood-bright);}
+  .fab svg{width:1.3rem; height:1.3rem;}
+
+  /* Línea que sale del centro del botón + al escrolear hacia abajo,
+     con un destello sutil que sube. Puramente decorativo: pointer-
+     events:none para que nunca estorbe al toque. */
+  .fab-scan-line{
+    position:absolute;
+    right:calc(1.2rem + 2.9rem);
+    left:0;
+    bottom:calc(1.2rem + env(safe-area-inset-bottom, 0px) + 1.45rem);
+    height:0;
+    pointer-events:none;
+    z-index:19;
+    overflow:visible;
+  }
+  .fab-scan-line::before{
+    content:'';
+    position:absolute;
+    left:0;
+    right:0;
+    top:0;
+    height:1px;
+    background:var(--blood-bright);
+    transform-origin:right center;
+    transform:scaleX(0);
+    opacity:0;
+  }
+  .fab-scan-line.active::before{
+    animation:fabLaserTravel 0.45s cubic-bezier(0.3,0.7,0.2,1) forwards;
+  }
+  @keyframes fabLaserTravel{
+    0%{transform:scaleX(0); opacity:0.5;}
+    100%{transform:scaleX(1); opacity:0.85;}
+  }
+  .fab-scan-line::after{
+    content:'';
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:70px;
+    background:linear-gradient(to top, rgba(122,20,20,0.28), transparent 85%);
+    opacity:0;
+    filter:blur(4px);
+  }
+  .fab-scan-line.active::after{
+    animation:fabLaserFlash 0.6s ease-out 0.42s;
+  }
+  @keyframes fabLaserFlash{
+    0%{opacity:0; transform:translateY(0);}
+    18%{opacity:0.45; transform:translateY(0);}
+    100%{opacity:0; transform:translateY(-46px);}
+  }
+
+  .backup-row{
+    display:flex;
+    justify-content:center;
+    gap:1.2rem;
+    padding-top:0.7rem;
+    padding-right:2.1rem;
+    box-sizing:border-box;
+    flex-shrink:0;
+  }
+  .backup-btn{
+    all:unset;
+    cursor:pointer;
+    font-family:'Cinzel', serif;
+    font-size:0.6rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold-dim);
+    padding:0.3rem 0;
+    border-bottom:1px solid transparent;
+  }
+  .backup-btn:hover{color:var(--gold); border-color:var(--gold);}
+
+  /* ---------- vista editor ---------- */
+  #viewEditor{display:none; flex-direction:column; flex:1; min-height:0;}
+  .editor-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-shrink:0;
+    margin-bottom:0.6rem;
+    padding-right:3.4rem;
+  }
+  .editor-top-right{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:1 1 auto;
+    gap:1.1rem;
+  }
+  .save-btn{
+    all:unset;
+    cursor:pointer;
+    font-family:'Cinzel', serif;
+    font-weight:600;
+    font-size:0.62rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--void);
+    background:var(--gold);
+    padding:0.4rem 0.7rem;
+    border-radius:2px;
+  }
+  .save-btn:active{background:var(--gold-dim);}
+  .icon-btn{
+    all:unset;
+    cursor:pointer;
+    width:2.1rem;
+    height:2.1rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--gold);
+  }
+  .icon-btn svg{width:1.2rem; height:1.2rem;}
+  .icon-btn.burn{color:var(--blood-bright);}
+  .icon-btn.important-btn.active{
+    color:#ff1744;
+    filter:drop-shadow(0 0 4px rgba(255,23,68,0.85));
+  }
+  .icon-btn.important-btn.active svg{fill:#ff1744; fill-opacity:0.25;}
+  @keyframes neonPulseRed{
+    0%, 100%{
+      color:#ff1744;
+      text-shadow:0 0 4px rgba(255,23,68,0.65), 0 0 9px rgba(255,23,68,0.4);
+    }
+    50%{
+      color:#ff5c7a;
+      text-shadow:0 0 11px rgba(255,23,68,1), 0 0 20px rgba(255,23,68,0.85);
+    }
+  }
+  .note-date.important{
+    animation:neonPulseRed 1.3s ease-in-out infinite;
+  }
+  .save-flag{
+    font-family:'Cinzel', serif;
+    font-size:0.58rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold-dim);
+    opacity:0;
+    transition:opacity 0.4s ease;
+  }
+  .save-flag.show{opacity:1;}
+
+  .title-wrap{
+    position:relative;
+    flex-shrink:0;
+    margin-bottom:0.5rem;
+  }
+  #noteTitle{
+    font-family:'Cinzel', serif;
+    font-weight:600;
+    font-size:1.15rem;
+    padding:0.7rem 4.2rem 0.7rem 0.8rem;
+    margin-bottom:0;
+    width:100%;
+    flex-shrink:0;
+    caret-color:var(--gold);
+    background:var(--void-2);
+    border:1px solid var(--line);
+    color:var(--parchment);
+    border-radius:3px;
+    outline:none;
+    white-space:nowrap;
+    overflow-x:auto;
+    touch-action:pan-x;
+    scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(to right, black calc(100% - 4.3rem), transparent 100%);
+    mask-image:linear-gradient(to right, black calc(100% - 4.3rem), transparent 100%);
+    -webkit-text-stroke:0.4px rgba(140,130,108,0.55);
+  }
+  #noteTitle::-webkit-scrollbar{display:none;}
+  #noteTitle:focus{border-color:var(--gold);}
+  #noteTitle:empty:before{
+    content:attr(data-placeholder);
+    color:var(--parchment-dim);
+    font-style:italic;
+  }
+  .title-actions{
+    position:absolute;
+    right:1px;
+    top:1px;
+    bottom:1px;
+    display:flex;
+    align-items:center;
+    gap:0.1rem;
+    padding-right:0.25rem;
+    padding-left:0.8rem;
+    background:linear-gradient(to right, transparent, var(--void-2) 1rem);
+    border-radius:0 2px 2px 0;
+  }
+  .title-action-btn{
+    all:unset;
+    cursor:pointer;
+    width:1.7rem;
+    height:1.7rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:3px;
+    color:var(--blood-bright);
+    transition:color 0.15s ease, background 0.15s ease;
+  }
+  .title-action-btn:active{
+    color:var(--blood-bright);
+    background:rgba(165,36,36,0.15);
+  }
+  .title-action-btn svg{width:1.15rem; height:1.15rem;}
+  .note-body-wrap{
+    position:relative;
+    flex:1;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+  }
+  #noteBody{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    padding:0.9rem 0.35rem 2.4rem;
+    font-size:1rem;
+    line-height:1.7;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    caret-color:var(--gold);
+    outline:none;
+    touch-action:pan-y;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    -webkit-text-stroke:0.35px rgba(140,130,108,0.4);
+  }
+  #noteBody::-webkit-scrollbar{display:none;}
+  .scroll-thumb{
+    position:absolute;
+    right:-0.45rem;
+    top:0;
+    width:1.3rem;
+    height:2.5rem;
+    border-radius:999px;
+    background:rgba(15,10,8,0.88);
+    border:1px solid var(--gold-dim);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--gold);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.25s ease;
+    touch-action:none;
+    z-index:5;
+    box-shadow:0 2px 8px rgba(0,0,0,0.4);
+  }
+  .scroll-thumb svg{width:0.85rem; height:0.85rem;}
+  .scroll-thumb.visible{opacity:1; pointer-events:auto;}
+  .scroll-thumb.dragging{
+    opacity:1;
+    pointer-events:auto;
+    transition:none;
+    border-color:var(--gold);
+    background:rgba(15,10,8,0.96);
+  }
+  #noteBody:empty:before{
+    content:attr(data-placeholder);
+    color:var(--parchment-dim);
+    font-style:italic;
+  }
+  #noteBody font[size="7"]{
+    font-size:1em; /* resguardo: el JS reemplaza esto al toque por el tamaño real elegido */
+  }
+  #noteBody b, #noteBody strong{
+    font-weight:700;
+  }
+  .format-bar{
+    display:flex;
+    gap:0.4rem;
+    flex-shrink:0;
+    margin-bottom:0.5rem;
+    outline:none;
+  }
+  .format-btn{
+    all:unset;
+    cursor:pointer;
+    width:2rem;
+    height:2rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid var(--line);
+    border-radius:3px;
+    color:var(--parchment-dim);
+    font-family:'EB Garamond', serif;
+    font-size:0.95rem;
+    outline:none;
+    background:var(--void-2);
+  }
+  .format-btn[data-cmd="bold"]{font-weight:700;}
+  .format-btn[data-cmd="italic"]{font-style:italic;}
+  .format-btn[data-cmd="underline"]{text-decoration:underline;}
+  .format-btn[data-cmd="strikeThrough"]{text-decoration:line-through;}
+  .format-btn:active{background:rgba(201,162,39,0.12);}
+  .format-btn.active{
+    color:var(--gold);
+    border-color:var(--gold);
+    background:rgba(201,162,39,0.1);
+  }
+  .format-btn svg{width:1.05rem; height:1.05rem;}
+  .format-bar{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    padding-bottom:0.15rem;
+  }
+  .format-bar::-webkit-scrollbar{display:none;}
+  .format-bar .format-btn,
+  .format-bar .fb-select{flex-shrink:0;}
+  .fb-sep{
+    width:1px;
+    align-self:stretch;
+    background:var(--line);
+    flex-shrink:0;
+    margin:0 0.1rem;
+  }
+  .fb-select{
+    all:unset;
+    cursor:pointer;
+    box-sizing:border-box;
+    height:2rem;
+    max-width:6.4rem;
+    padding:0 0.4rem;
+    border:1px solid var(--line);
+    border-radius:3px;
+    color:var(--parchment-dim);
+    font-family:'EB Garamond', serif;
+    font-size:0.78rem;
+    outline:none;
+    background:var(--void-2);
+  }
+  .fb-select:focus{border-color:var(--gold); color:var(--gold);}
+  .fb-dd{position:relative; flex-shrink:0;}
+  .fb-dd-btn{
+    all:unset;
+    cursor:pointer;
+    box-sizing:border-box;
+    display:flex;
+    align-items:center;
+    gap:0.3rem;
+    height:2rem;
+    padding:0 0.6rem;
+    border-radius:999px;
+    background:var(--void);
+    color:var(--parchment);
+    font-family:'EB Garamond', serif;
+    font-size:0.85rem;
+  }
+  .fb-dd-btn:active, .fb-dd.open .fb-dd-btn{background:#000;}
+  .fb-dd-btn-size{min-width:2.6rem; justify-content:center; font-weight:600; font-size:0.9rem;}
+  .fb-dd-arrow{width:0.7rem; height:0.7rem; flex-shrink:0;}
+  .fb-dd-menu{
+    display:none;
+    position:fixed;
+    min-width:6.5rem;
+    max-height:14rem;
+    overflow-y:auto;
+    background:var(--void-2);
+    border:1px solid var(--gold-dim);
+    border-radius:8px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.5);
+    padding:0.3rem;
+    z-index:500;
+  }
+  .fb-dd-menu.fb-dd-menu-open{display:block;}
+  .fb-dd-item{
+    all:unset;
+    display:block;
+    box-sizing:border-box;
+    width:100%;
+    cursor:pointer;
+    padding:0.45rem 0.6rem;
+    border-radius:5px;
+    color:var(--parchment);
+    font-size:0.9rem;
+    text-align:center;
+  }
+  .fb-dd-item:active, .fb-dd-item:hover{background:rgba(201,162,39,0.15); color:var(--gold);}
+  .fb-dd-btn-color{
+    gap:0.3rem;
+    padding:0 0.5rem;
+  }
+  .fc-icon{
+    font-family:'EB Garamond', serif;
+    font-weight:700;
+    font-size:0.95rem;
+    line-height:1;
+  }
+  .fc-icon-bg{
+    padding:0 0.2rem;
+    border-radius:2px;
+    background:rgba(231,221,196,0.18);
+  }
+  .fc-swatch{
+    width:0.9rem;
+    height:0.22rem;
+    border-radius:1px;
+    background:var(--parchment);
+    flex-shrink:0;
+  }
+  .fb-dd-menu-colors{
+    display:none;
+    padding:0.5rem;
+    grid-template-columns:repeat(4, 1.7rem);
+    gap:0.5rem;
+  }
+  .fb-dd-menu-colors.fb-dd-menu-open{display:grid;}
+  .fb-color-item{
+    all:unset;
+    box-sizing:border-box;
+    cursor:pointer;
+    width:1.7rem;
+    height:1.7rem;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+  }
+  .fb-color-item:active{border-color:var(--gold); transform:scale(0.92);}
+  .fb-color-none{
+    background:linear-gradient(to top right, transparent calc(50% - 1px), var(--blood-bright), transparent calc(50% + 1px));
+  }
+  .format-bar.floating{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    padding:0.3rem 0.5rem calc(0.3rem + env(safe-area-inset-bottom, 0px));
+    background:var(--void-2);
+    border-top:1px solid var(--line);
+    box-shadow:0 -6px 18px rgba(0,0,0,0.4);
+    z-index:80;
+  }
+  .bar-pin-btn svg{transition:transform 0.2s;}
+  .bar-pin-btn.pinned-down svg{transform:rotate(180deg);}
+  .comment-btn{
+    width:auto;
+    padding:0 0.6rem;
+    font-size:0.78rem;
+    font-style:italic;
+    color:var(--parchment-dim);
+    gap:0.3rem;
+  }
+  .comment-btn.active{
+    color:#1c3540;
+    border-color:#8fb2c0;
+    background:#a9c9d6;
+  }
+  .comment-mark{
+    background:#b7b7b2;
+    color:#2a2a28;
+    -webkit-text-fill-color:#2a2a28 !important;
+    border-top:1px solid var(--blood-bright);
+    border-bottom:1px solid var(--blood-bright);
+    border-left:1px solid var(--blood-bright);
+    border-radius:2px;
+    padding:0.15em 0.15em;
+    position:relative;
+  }
+  .comment-mark:not(:empty)::after{
+    content:none;
+  }
+  .comment-note-btn{
+    all:unset;
+    display:inline-block;
+    cursor:pointer;
+    margin-left:0.5em;
+    padding:0.15em 0.4em;
+    font-family:'Cinzel', serif;
+    font-size:0.62em;
+    font-style:normal;
+    font-weight:600;
+    letter-spacing:0.08em;
+    color:#f4ead0;
+    background:var(--blood);
+    border-radius:2px;
+    vertical-align:middle;
+    -webkit-user-select:none;
+    user-select:none;
+    animation:noteBadgePulse 1.6s ease-in-out infinite;
+    /* Si el botón queda anidado adentro de un span de arcoíris de
+       letra, ese span hereda "-webkit-text-fill-color:transparent"
+       hacia sus hijos -y como es una propiedad heredada, "gana" por
+       encima del color normal del botón, dejando el texto invisible
+       aunque el color esté bien puesto. Lo forzamos acá con
+       !important para que el botón SIEMPRE se vea, sin importar qué
+       arcoíris lo rodee. */
+    -webkit-text-fill-color:#f4ead0 !important;
+  }
+  .comment-note-btn:active{transform:scale(0.88);}
+  .comment-mark.has-note .comment-note-btn{
+    animation:none;
+    background:var(--gold);
+    color:#2a1a05;
+    -webkit-text-fill-color:#2a1a05 !important;
+  }
+  @keyframes noteBadgePulse{
+    0%, 100%{opacity:1;}
+    50%{opacity:0.45;}
+  }
+  body.theme-light .comment-mark{
+    background:#d6d6d0;
+    color:#2a2a28;
+    -webkit-text-fill-color:#2a2a28 !important;
+  }
+
+  /* ---------- modal quemar ---------- */
+  .modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.65);
+    z-index:50;
+    align-items:center;
+    justify-content:center;
+    padding:1rem;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--void-2);
+    border:1px solid var(--gold);
+    border-radius:4px;
+    padding:1.4rem;
+    max-width:20rem;
+    text-align:center;
+  }
+  .modal-box p{margin:0 0 1rem; font-style:italic; color:var(--parchment);}
+  .modal-overlay:has(.note-box){padding:0;}
+  .modal-box.note-box{
+    max-width:none;
+    width:100%;
+    height:100%;
+    text-align:left;
+    border:none;
+    border-bottom:1px solid rgba(255,36,54,0.35);
+    border-radius:0;
+    display:flex;
+    flex-direction:column;
+    padding:1.4rem 1.2rem calc(1.2rem + env(safe-area-inset-bottom));
+    box-sizing:border-box;
+    position:relative;
+  }
+  .modal-box.note-box h3{
+    margin:0 0 0.8rem;
+    font-family:'Cinzel', serif;
+    font-size:1rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gold);
+    text-align:center;
+    flex:0 0 auto;
+  }
+  #noteTextarea{
+    width:100%;
+    flex:1 1 auto;
+    min-height:0;
+    resize:none;
+    padding:0.8rem;
+    font-size:1rem;
+    line-height:1.5;
+    margin-bottom:1rem;
+    box-sizing:border-box;
+  }
+  .modal-actions .danger{border-color:var(--blood-bright); color:var(--blood-bright);}
+  .modal-actions .danger:hover{background:var(--blood-bright); color:var(--parchment);}
+  .modal-actions{display:flex; gap:0.8rem; justify-content:center; flex:0 0 auto;}
+  .modal-actions button{
+    all:unset;
+    cursor:pointer;
+    font-family:'Cinzel', serif;
+    font-size:0.65rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:0.55rem 1rem;
+    border-radius:3px;
+    border:1px solid var(--line);
+  }
+  .modal-actions .confirm{border-color:var(--blood-bright); color:var(--blood-bright);}
+  .modal-actions .confirm:hover{background:var(--blood-bright); color:var(--parchment);}
+  .modal-actions .cancel{color:var(--parchment-dim);}
+  .modal-actions .cancel:hover{color:var(--parchment);}
+
+  #importFile{display:none;}
+</style>
+</head>
+<body>
+<div class="book" id="book">
+  <button class="theme-toggle" id="themeToggle" type="button" title="Cambiar tema">
+    <span class="icon-stage">
+      <svg id="iconMoon" class="icon-visible" viewBox="0 0 24 24">
+        <circle cx="12.5" cy="12" r="8" fill="currentColor"/>
+        <circle cx="17" cy="8.7" r="7" fill="var(--void-2)"/>
+      </svg>
+      <svg id="iconSun" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+        <path d="M12 1.4 13.3 6.3 10.7 6.3Z"/>
+        <path d="M12 1.4 13.3 6.3 10.7 6.3Z" transform="rotate(45 12 12)"/>
+        <path d="M12 1.4 13.3 6.3 10.7 6.3Z" transform="rotate(90 12 12)"/>
+        <path d="M12 1.4 13.3 6.3 10.7 6.3Z" transform="rotate(135 12 12)"/>
+        <path d="M12 1.4 13.3 6.3 10.7 6.3Z" transform="rotate(180 12 12)"/>
+        <path d="M12 1.4 13.3 6.3 10.7 6.3Z" transform="rotate(225 12 12)"/>
+        <path d="M12 1.4 13.3 6.3 10.7 6.3Z" transform="rotate(270 12 12)"/>
+        <path d="M12 1.4 13.3 6.3 10.7 6.3Z" transform="rotate(315 12 12)"/>
+        <circle cx="12" cy="12" r="4.6"/>
+      </svg>
+    </span>
+  </button>
+
+  <!-- LISTA -->
+  <div id="viewList">
+    <header>
+      <h1>Bitácora</h1>
+      <div class="sub">Universo Apócrifo</div>
+    </header>
+
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search" type="text" placeholder="Buscar en la bitácora...">
+    </div>
+
+    <div id="list"></div>
+
+    <div class="backup-row">
+      <button class="backup-btn" id="exportBtn" type="button">Custodiar copia</button>
+      <button class="backup-btn" id="importBtn" type="button">Restaurar copia</button>
+    </div>
+    <input type="file" id="importFile" accept="application/json">
+
+    <button class="fab" id="fabAdd" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <line x1="12" y1="6" x2="12" y2="18"/>
+        <line x1="6" y1="12" x2="18" y2="12"/>
+      </svg>
+    </button>
+    <div class="fab-scan-line" id="fabScanLine" aria-hidden="true"></div>
+  </div>
+
+  <!-- EDITOR -->
+  <div id="viewEditor">
+    <div class="editor-top">
+      <button class="icon-btn" id="backBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="editor-top-right">
+        <span class="save-flag" id="saveFlag">consignado</span>
+        <button class="icon-btn bar-pin-btn" id="barPinBtn" type="button" title="Subir/bajar la barra de herramientas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+        </button>
+        <button class="icon-btn" id="copyBtn" type="button" title="Copiar para pegar en Word/Docs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/></svg>
+        </button>
+        <button class="icon-btn important-btn" id="importantBtn" type="button" title="Marcar como importante">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l2.9 6.6 7.1.7-5.4 4.8 1.6 7-6.2-3.8-6.2 3.8 1.6-7-5.4-4.8 7.1-.7z"/></svg>
+        </button>
+        <button class="save-btn" id="saveBtn" type="button">Guardar</button>
+        <button class="icon-btn burn" id="burnBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2s5 5.5 5 10a5 5 0 0 1-10 0c0-1.5 1-2.5 1-2.5s.5 2 2 2c-1-2-.5-4 1-6 1 2 1 3 1-3.5z"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="title-wrap">
+      <div id="noteTitle" contenteditable="true" data-placeholder="Sin título" autocorrect="off" autocapitalize="off" autocomplete="off" writingsuggestions="false" spellcheck="false"></div>
+      <div class="title-actions">
+        <button class="title-action-btn" id="undoBtn" type="button" title="Deshacer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+        </button>
+        <button class="title-action-btn" id="redoBtn" type="button" title="Rehacer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="format-bar" id="formatBar">
+      <div class="fb-dd fb-dd-color" id="fontColorDD">
+        <button type="button" class="fb-dd-btn fb-dd-btn-color" id="fontColorBtn" title="Color de fuente">
+          <span class="fc-icon">A</span>
+          <span class="fc-swatch" id="fontColorSwatch"></span>
+          <svg class="fb-dd-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="fb-dd-menu fb-dd-menu-colors" id="fontColorMenu">
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#e7ddc4" style="background:#e7ddc4;" title="Blanco"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#0a0a0a" style="background:#0a0a0a;" title="Negro"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#8f8f8f" style="background:#8f8f8f;" title="Gris"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#a52424" style="background:#a52424;" title="Rojo"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#c9a227" style="background:#c9a227;" title="Amarillo"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#d17ba6" style="background:#d17ba6;" title="Rosado"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#8b5fbf" style="background:#8b5fbf;" title="Violeta"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#3f7cc9" style="background:#3f7cc9;" title="Azul"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#b026ff" style="background:#b026ff;" title="Violeta neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#ff10f0" style="background:#ff10f0;" title="Fucsia neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#39ff14" style="background:#39ff14;" title="Verde neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#00e5ff" style="background:#00e5ff;" title="Azul neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#ff6d00" style="background:#ff6d00;" title="Naranja neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#f7ff00" style="background:#f7ff00;" title="Amarillo neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="rainbow" style="background:linear-gradient(90deg,#ff2079,#c026d3,#7b2ff7,#4d3dff,#00e5ff,#00ffc8,#39ff14,#b6ff00,#faed27,#ffb700,#ff9d00,#ff3131,#ff2079);" title="Arcoíris"></button>
+        </div>
+      </div>
+      <div class="fb-dd fb-dd-color" id="bgColorDD">
+        <button type="button" class="fb-dd-btn fb-dd-btn-color" id="bgColorBtn" title="Color de fondo">
+          <span class="fc-icon fc-icon-bg">A</span>
+          <span class="fc-swatch" id="bgColorSwatch"></span>
+          <svg class="fb-dd-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="fb-dd-menu fb-dd-menu-colors" id="bgColorMenu">
+          <button type="button" class="fb-dd-item fb-color-item fb-color-none" data-value="" title="Sin color"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#e7ddc4" style="background:#e7ddc4;" title="Blanco"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#0a0a0a" style="background:#0a0a0a;" title="Negro"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#8f8f8f" style="background:#8f8f8f;" title="Gris"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#a52424" style="background:#a52424;" title="Rojo"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#c9a227" style="background:#c9a227;" title="Amarillo"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#d17ba6" style="background:#d17ba6;" title="Rosado"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#8b5fbf" style="background:#8b5fbf;" title="Violeta"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#3f7cc9" style="background:#3f7cc9;" title="Azul"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#b026ff" style="background:#b026ff;" title="Violeta neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#ff10f0" style="background:#ff10f0;" title="Fucsia neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#39ff14" style="background:#39ff14;" title="Verde neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#00e5ff" style="background:#00e5ff;" title="Azul neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#ff6d00" style="background:#ff6d00;" title="Naranja neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="#f7ff00" style="background:#f7ff00;" title="Amarillo neón"></button>
+          <button type="button" class="fb-dd-item fb-color-item" data-value="rainbow" style="background:linear-gradient(90deg,#ff2079,#c026d3,#7b2ff7,#4d3dff,#00e5ff,#00ffc8,#39ff14,#b6ff00,#faed27,#ffb700,#ff9d00,#ff3131,#ff2079);" title="Arcoíris"></button>
+        </div>
+      </div>
+      <span class="fb-sep"></span>
+      <button class="format-btn" data-cmd="bold" type="button" title="Negrita">B</button>
+      <button class="format-btn" data-cmd="italic" type="button" title="Cursiva">I</button>
+      <button class="format-btn" data-cmd="underline" type="button" title="Subrayado">U</button>
+      <button class="format-btn" data-cmd="strikeThrough" type="button" title="Tachado">S</button>
+      <span class="fb-sep"></span>
+      <button class="format-btn comment-btn" id="commentBtn" type="button" title="Resaltar / comentar">Comentar...</button>
+      <span class="fb-sep"></span>
+      <button class="format-btn" data-cmd="insertUnorderedList" type="button" title="Lista con viñetas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="4.5" cy="6" r="1.1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.1" fill="currentColor" stroke="none"/><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/></svg>
+      </button>
+      <button class="format-btn" data-cmd="insertOrderedList" type="button" title="Lista numerada">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><text x="1.5" y="8" font-size="7" fill="currentColor" stroke="none" font-family="sans-serif">1</text><text x="1.5" y="14" font-size="7" fill="currentColor" stroke="none" font-family="sans-serif">2</text><text x="1.5" y="20" font-size="7" fill="currentColor" stroke="none" font-family="sans-serif">3</text></svg>
+      </button>
+      <button class="format-btn" data-cmd="indent" type="button" title="Aumentar sangría">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="11" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/><path d="m3 9 3 3-3 3"/></svg>
+      </button>
+      <button class="format-btn" data-cmd="outdent" type="button" title="Reducir sangría">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="11" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/><path d="m6 9-3 3 3 3"/></svg>
+      </button>
+      <span class="fb-sep"></span>
+      <div class="fb-dd" id="fontFamilyDD">
+        <button type="button" class="fb-dd-btn" id="fontFamilyBtn" title="Tipografía">
+          <span id="fontFamilyLabel">Tipo</span>
+          <svg class="fb-dd-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="fb-dd-menu" id="fontFamilyMenu">
+          <button type="button" class="fb-dd-item" data-value="'EB Garamond', serif" style="font-family:'EB Garamond',serif;">Garamond</button>
+          <button type="button" class="fb-dd-item" data-value="'Cinzel', serif" style="font-family:'Cinzel',serif;">Cinzel</button>
+          <button type="button" class="fb-dd-item" data-value="'Great Vibes', cursive" style="font-family:'Great Vibes',cursive; font-size:1.15em;">Cursiva</button>
+          <button type="button" class="fb-dd-item" data-value="'Pirata One', fantasy" style="font-family:'Pirata One',fantasy; font-size:1.1em;">Gótica</button>
+          <button type="button" class="fb-dd-item" data-value="Georgia, serif" style="font-family:Georgia,serif;">Georgia</button>
+          <button type="button" class="fb-dd-item" data-value="'Courier New', monospace" style="font-family:'Courier New',monospace;">Courier</button>
+          <button type="button" class="fb-dd-item" data-value="Arial, sans-serif" style="font-family:Arial,sans-serif;">Arial</button>
+        </div>
+      </div>
+      <div class="fb-dd" id="fontSizeDD">
+        <button type="button" class="fb-dd-btn fb-dd-btn-size" id="fontSizeBtn" title="Tamaño">
+          <span id="fontSizeLabel">16</span>
+          <svg class="fb-dd-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="fb-dd-menu" id="fontSizeMenu">
+          <button type="button" class="fb-dd-item" data-value="12">12</button>
+          <button type="button" class="fb-dd-item" data-value="14">14</button>
+          <button type="button" class="fb-dd-item" data-value="16">16</button>
+          <button type="button" class="fb-dd-item" data-value="18">18</button>
+          <button type="button" class="fb-dd-item" data-value="20">20</button>
+          <button type="button" class="fb-dd-item" data-value="24">24</button>
+          <button type="button" class="fb-dd-item" data-value="28">28</button>
+          <button type="button" class="fb-dd-item" data-value="32">32</button>
+        </div>
+      </div>
+      <span class="fb-sep"></span>
+      <button class="format-btn" data-cmd="justifyLeft" type="button" title="Alinear a la izquierda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+      </button>
+      <button class="format-btn" data-cmd="justifyCenter" type="button" title="Centrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4.5" y1="18" x2="19.5" y2="18"/></svg>
+      </button>
+      <button class="format-btn" data-cmd="justifyRight" type="button" title="Alinear a la derecha">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="format-btn" data-cmd="justifyFull" type="button" title="Justificar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="note-body-wrap">
+      <div id="noteBody" contenteditable="true" data-placeholder="Consigná lo que el instante te dicte..." spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" writingsuggestions="false"></div>
+      <div class="scroll-thumb" id="scrollThumb" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL QUEMAR -->
+  <div class="modal-overlay" id="burnModal">
+    <div class="modal-box">
+      <p>¿Reducir esta página a cenizas?<br>No hay vuelta atrás.</p>
+      <div class="modal-actions">
+        <button class="cancel" id="burnCancel" type="button">Conservar</button>
+        <button class="confirm" id="burnConfirm" type="button">Quemar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ELIMINAR DESDE LA LISTA -->
+  <div class="modal-overlay" id="itemDeleteModal">
+    <div class="modal-box">
+      <p>¿Eliminar este registro?<br>No hay vuelta atrás.</p>
+      <div class="modal-actions">
+        <button class="cancel" id="itemDeleteCancel" type="button">Conservar</button>
+        <button class="confirm" id="itemDeleteConfirm" type="button">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NOTA (carilla para escribir sobre el fragmento resaltado) -->
+  <div class="modal-overlay" id="noteModal">
+    <div class="modal-box note-box">
+      <h3>Nota apócrifa</h3>
+      <textarea id="noteTextarea" placeholder="Escribí aquí tu nota sobre este fragmento..."></textarea>
+      <div class="modal-actions">
+        <button class="cancel" id="noteCancel" type="button">Cancelar</button>
+        <button class="danger" id="noteDelete" type="button">Borrar nota</button>
+        <button class="confirm" id="noteSave" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'bitacora_apocrifa_notes';
+  const THEME_KEY = 'bitacora_apocrifa_theme';
+
+  const viewList = document.getElementById('viewList');
+  const viewEditor = document.getElementById('viewEditor');
+  const listEl = document.getElementById('list');
+  const searchEl = document.getElementById('search');
+  const titleEl = document.getElementById('noteTitle');
+  const bodyEl = document.getElementById('noteBody');
+  // Algunos navegadores/WebViews de Android (como el interno de ciertos
+  // gestores de archivos) no alcanzan a apagar el corrector ortográfico
+  // del todo solo con el atributo HTML "spellcheck" -hace falta además
+  // asignar la propiedad por código para que la desactivación pegue de
+  // verdad y no aparezca más el subrayado con sugerencias.
+  [titleEl, bodyEl].forEach(el => {
+    el.spellcheck = false;
+    el.setAttribute('autocorrect', 'off');
+    el.setAttribute('autocapitalize', 'off');
+  });
+  const saveFlag = document.getElementById('saveFlag');
+  const burnModal = document.getElementById('burnModal');
+  const itemDeleteModal = document.getElementById('itemDeleteModal');
+
+  let notes = [];
+  let currentId = null;
+  let lastFocusTarget = 'body';
+  let pendingDeleteId = null;
+  let saveTimer = null;
+  let flagTimer = null;
+
+  // ---- Historial propio de deshacer/rehacer ----
+  // Las flechas rojas usaban document.execCommand('undo'/'redo'), que
+  // depende PURA Y EXCLUSIVAMENTE de la pila nativa del navegador. El
+  // problema: el arcoíris (y cualquier otra cosa que armamos a mano con
+  // extractContents()/TreeWalker, o con innerHTML directo) NUNCA queda
+  // anotada en esa pila nativa, porque no pasa por execCommand. Resultado:
+  // tocás deshacer después de un arcoíris y no pasa nada (o deshace otra
+  // cosa vieja que sí había quedado registrada). Por eso armamos acá un
+  // historial propio que guarda "fotos" (título+cuerpo) y sí lo captura
+  // absolutamente todo, venga de donde venga el cambio.
+  const MAX_HISTORY = 100;
+  let history = [];
+  let historyIndex = -1;
+  let restoringHistory = false; // evita que restaurar una foto genere otra foto
+  let historyDebounceTimer = null;
+
+  function historySnapshot(){
+    return { title: titleEl.innerHTML, body: bodyEl.innerHTML };
+  }
+
+  function pushHistory(){
+    if(restoringHistory) return;
+    const snap = historySnapshot();
+    const last = history[historyIndex];
+    if(last && last.title === snap.title && last.body === snap.body) return;
+    // si el usuario había deshecho y ahora hace algo nuevo, se pisa el
+    // "futuro" que había quedado colgado (igual que cualquier editor)
+    history = history.slice(0, historyIndex + 1);
+    history.push(snap);
+    if(history.length > MAX_HISTORY) history.shift();
+    historyIndex = history.length - 1;
+  }
+
+  function pushHistoryDebounced(){
+    clearTimeout(historyDebounceTimer);
+    historyDebounceTimer = setTimeout(pushHistory, 400);
+  }
+
+  function resetHistory(){
+    clearTimeout(historyDebounceTimer);
+    history = [historySnapshot()];
+    historyIndex = 0;
+  }
+
+  function caretToEnd(el){
+    el.focus();
+    const r = document.createRange();
+    r.selectNodeContents(el);
+    r.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+
+  function restoreHistorySnapshot(snap){
+    restoringHistory = true;
+    titleEl.innerHTML = snap.title;
+    bodyEl.innerHTML = snap.body;
+    attachNoteButtons();
+    restoringHistory = false;
+    // OJO: antes acá se llamaba a caretToEnd(...), que hace .focus()
+    // sobre el título o el cuerpo para dejar el cursor listo para
+    // seguir escribiendo. El problema es que ese .focus() -al pasar
+    // dentro del mismo click del botón- cuenta como gesto del usuario
+    // y el navegador levanta el teclado, tapando media nota justo
+    // cuando lo que querés es VER qué cambió. Ahora, en cambio, sacamos
+    // el foco a propósito (blur) de lo que haya quedado enfocado, para
+    // que el teclado se esconda y la nota se vea completa. Si el
+    // usuario quiere seguir escribiendo, toca la nota de nuevo y ahí sí
+    // vuelve a aparecer el teclado, como es normal.
+    titleEl.blur();
+    bodyEl.blur();
+    updateFormatState();
+    scheduleSave();
+  }
+
+  function doUndo(){
+    clearTimeout(historyDebounceTimer);
+    pushHistory();
+    if(historyIndex <= 0) return;
+    historyIndex--;
+    restoreHistorySnapshot(history[historyIndex]);
+  }
+
+  function doRedo(){
+    if(historyIndex >= history.length - 1) return;
+    historyIndex++;
+    restoreHistorySnapshot(history[historyIndex]);
+  }
+
+  function load(){
+    try{ notes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch(e){ notes = []; }
+  }
+  function persist(skipCloudPush){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+    if(!skipCloudPush){
+      const current = notes.find(n => n.id === currentId);
+      if(current) scheduleCloudPush(current);
+    }
+  }
+
+  // ====== SINCRONIZACIÓN CON LA NUBE (Cloudflare Worker + D1) ======
+  const PASSCODE_KEY = 'bitacora_passcode';
+  let cloudSyncTimer = null;
+
+  function getPasscode(){
+    let pc = localStorage.getItem(PASSCODE_KEY);
+    if(!pc){
+      pc = prompt('Ingresá tu passcode de la Bitácora para sincronizar entre dispositivos (dejalo en blanco para usar solo en este dispositivo):');
+      if(pc) localStorage.setItem(PASSCODE_KEY, pc);
+    }
+    return pc;
+  }
+
+  async function apiFetch(path, options){
+    const pc = getPasscode();
+    if(!pc) return null; // el usuario eligió no sincronizar
+    options = options || {};
+    options.headers = Object.assign({}, options.headers, {
+      'X-Passcode': pc,
+      'Content-Type': 'application/json'
+    });
+    try{
+      const res = await fetch(path, options);
+      if(res.status === 401){
+        alert('Passcode incorrecto. Se va a pedir de nuevo.');
+        localStorage.removeItem(PASSCODE_KEY);
+        return null;
+      }
+      return res;
+    }catch(e){
+      return null; // sin conexión: no rompe nada, sigue local
+    }
+  }
+
+  async function syncPull(){
+    const res = await apiFetch('/api/notas', { method: 'GET' });
+    if(!res || !res.ok) return;
+    let data;
+    try{ data = await res.json(); }catch(e){ return; }
+    if(!data.notas) return;
+    let changed = false;
+    data.notas.forEach(remote => {
+      let remoteNote;
+      try{ remoteNote = JSON.parse(remote.contenido); }catch(e){ return; }
+      const local = notes.find(n => n.id === remote.id);
+      if(!local){
+        notes.push(remoteNote);
+        changed = true;
+      }else if(remote.updated_at > local.updatedAt){
+        Object.assign(local, remoteNote);
+        changed = true;
+      }
+    });
+    if(changed){
+      persist(true); // true: no re-disparar push, ya viene sincronizado
+      render();
+    }
+  }
+
+  function scheduleCloudPush(note){
+    clearTimeout(cloudSyncTimer);
+    cloudSyncTimer = setTimeout(() => syncPushNote(note), 800);
+  }
+
+  async function syncPushNote(note){
+    if(!note) return;
+    await apiFetch('/api/notas', {
+      method: 'POST',
+      body: JSON.stringify({ id: note.id, contenido: note, updated_at: note.updatedAt })
+    });
+  }
+
+  async function syncDeleteNote(id){
+    if(!id) return;
+    await apiFetch('/api/notas/' + encodeURIComponent(id), { method: 'DELETE' });
+  }
+  function fmtDate(ts){
+    const d = new Date(ts);
+    return d.toLocaleDateString('es-AR', {weekday:'long', day:'2-digit', month:'short', year:'numeric'}) +
+      ', ' + d.toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+  }
+  const plainCache = document.createElement('div');
+  function plainText(html){
+    plainCache.innerHTML = html || '';
+    plainCache.querySelectorAll('.comment-note-btn').forEach(b => b.remove());
+    return (plainCache.textContent || '').replace(/\s+/g,' ').trim();
+  }
+  function formatWordCount(n){
+    if(n >= 1000){
+      const k = n / 1000;
+      const rounded = k >= 10 ? Math.round(k) : Math.round(k * 10) / 10;
+      return rounded.toLocaleString('es-AR') + 'k';
+    }
+    return n.toLocaleString('es-AR');
+  }
+
+  function render(){
+    const q = searchEl.value.trim().toLowerCase();
+    const sorted = [...notes].sort((a,b)=>b.updatedAt - a.updatedAt);
+    const filtered = q ? sorted.filter(n =>
+      (n.title||'').toLowerCase().includes(q) || plainText(n.body).toLowerCase().includes(q)
+    ) : sorted;
+
+    if(filtered.length === 0){
+      listEl.innerHTML = `<div class="empty">${q ? 'Ningún registro coincide con tu búsqueda.' : 'La bitácora está en blanco.<br>Tocá el sello para comenzar.'}</div>`;
+      return;
+    }
+    listEl.innerHTML = filtered.map(n => {
+      const title = n.title.trim() || 'Sin título';
+      const bodyText = plainText(n.body);
+      const preview = bodyText.slice(0,120) || 'Página en blanco...';
+      const wordCount = bodyText ? bodyText.split(/\s+/).filter(Boolean).length : 0;
+      // Autocorrección de notas guardadas antes de este arreglo (o
+      // abiertas nunca desde entonces): los dos arcoíris no pueden
+      // convivir, priorizamos la letra y apagamos el fondo.
+      if(n.titleColor === 'rainbow' && n.titleBgColor === 'rainbow'){
+        n.titleBgColor = '';
+      }
+      let titleStyle = '';
+      if(n.titleFont){
+        titleStyle += `font-family:${n.titleFont};`;
+      }
+      // OJO: letra arcoíris y fondo arcoíris usan las dos la propiedad
+      // "background-image" para el mismo truco de recorte. Si están
+      // guardados los dos colores a la vez (uno arcoíris y el otro
+      // sólido, de una elección anterior), sólo puede pintarse UNO en
+      // pantalla o se pisan entre sí. Le damos prioridad a lo que esté
+      // en arcoíris, e ignoramos el color sólido guardado del otro
+      // atributo mientras tanto (sigue guardado en los datos, se vuelve
+      // a mostrar solo cuando el arcoíris se apague).
+      if(n.titleColor === 'rainbow'){
+        titleStyle += `background-image:${RAINBOW_GRADIENT};-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:saturate(1.6) brightness(1.25) drop-shadow(0 0 4px rgba(255,255,255,0.5));`;
+      }else if(n.titleColor){
+        titleStyle += `color:${n.titleColor};`;
+      }
+      if(n.titleBgColor === 'rainbow'){
+        titleStyle += `background-image:linear-gradient(to right, #ff2079 0%, #c026d3 8%, #7b2ff7 17%, #4d3dff 25%, #00e5ff 33%, #00ffc8 42%, #39ff14 50%, #b6ff00 58%, #faed27 67%, #ffb700 75%, #ff9d00 83%, #ff3131 92%, #ff2079 100%);filter:saturate(1.6) brightness(1.15);box-shadow:0 0 10px rgba(255,255,255,0.3);`;
+      }else if(n.titleBgColor && n.titleColor !== 'rainbow'){
+        titleStyle += `background-image:linear-gradient(to right, ${n.titleBgColor} 55%, transparent);`;
+      }
+      return `<div class="note-item" data-id="${n.id}">
+        <div class="bar"></div>
+        <div class="content">
+          <div class="note-title"${titleStyle ? ` style="${titleStyle}"` : ''}>${escapeHtml(title)}</div>
+          <div class="note-preview">${escapeHtml(preview)}</div>
+          <div class="note-date${n.important ? ' important' : ''}">${fmtDate(n.updatedAt)} (${formatWordCount(wordCount)} ${wordCount === 1 ? 'palabra' : 'palabras'})</div>
+        </div>
+        <button class="item-menu-btn" type="button" data-menu-toggle="${n.id}" aria-label="Opciones">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
+        </button>
+        <div class="item-menu" data-menu="${n.id}">
+          <button class="item-menu-option" type="button" data-action="share" data-id="${n.id}">Compartir</button>
+          <button class="item-menu-option danger" type="button" data-action="delete" data-id="${n.id}">Eliminar</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function openNote(id){
+    currentId = id;
+    const n = notes.find(x => x.id === id);
+    // Autocorrección de notas guardadas antes de este arreglo: los dos
+    // arcoíris (letra y fondo) no pueden convivir, así que si quedaron
+    // los dos marcados le damos prioridad a la letra y apagamos el fondo.
+    if(n.titleColor === 'rainbow' && n.titleBgColor === 'rainbow'){
+      n.titleBgColor = '';
+    }
+    titleEl.textContent = n.title;
+    titleEl.style.background = '';
+    titleEl.style.backgroundColor = '';
+    titleEl.style.webkitBackgroundClip = '';
+    titleEl.style.backgroundClip = '';
+    titleEl.style.setProperty('-webkit-text-fill-color', '');
+    titleEl.style.setProperty('-webkit-text-stroke', '');
+    titleEl.style.filter = '';
+    titleEl.style.textShadow = '';
+    titleEl.style.boxShadow = '';
+    titleEl.style.color = '';
+    if(n.titleColor === 'rainbow'){
+      renderTitleRainbow();
+    }else{
+      titleEl.style.color = n.titleColor || '';
+    }
+    if(n.titleBgColor === 'rainbow'){
+      titleEl.style.webkitBackgroundClip = 'border-box';
+      titleEl.style.backgroundClip = 'border-box';
+      titleEl.style.background = RAINBOW_GRADIENT;
+      titleEl.style.filter = 'saturate(1.6) brightness(1.15)';
+      titleEl.style.boxShadow = '0 0 14px rgba(255,255,255,0.35)';
+    }else{
+      titleEl.style.backgroundColor = n.titleBgColor || '';
+    }
+    titleEl.style.fontFamily = n.titleFont || '';
+    document.getElementById('fontColorSwatch').style.background = n.titleColor === 'rainbow' ? RAINBOW_GRADIENT : (n.titleColor || '');
+    document.getElementById('bgColorSwatch').style.background = n.titleBgColor === 'rainbow' ? RAINBOW_GRADIENT : (n.titleBgColor || '');
+    document.getElementById('fontFamilyLabel').textContent = fontFamilyLabelFor(n.titleFont);
+    document.getElementById('importantBtn').classList.toggle('active', !!n.important);
+    bodyEl.innerHTML = n.body;
+    attachNoteButtons();
+    typingHighlightArmed = false;
+    resetHistory();
+    updateFormatState();
+    requestAnimationFrame(() => { if(typeof positionThumb === 'function') positionThumb(); });
+    viewList.style.display = 'none';
+    viewEditor.style.display = 'flex';
+    setTimeout(()=>titleEl.textContent ? bodyEl.focus() : titleEl.focus(), 50);
+  }
+
+  function newNote(){
+    const n = { id: 'n'+Date.now(), title:'', body:'', createdAt: Date.now(), updatedAt: Date.now() };
+    notes.push(n);
+    persist();
+    openNote(n.id);
+  }
+
+  // El guardado automático de título/cuerpo es "debounced" (450ms) para no
+  // escribir a disco en cada tecla. Eso significa que n.title/n.body del
+  // array "notes" pueden estar desactualizados en cualquier momento. Antes
+  // de decidir algo que dependa de esos campos (por ejemplo, si la nota
+  // está vacía y hay que borrarla al volver atrás), hay que sincronizarlos
+  // primero con lo que hay realmente en pantalla, o el debounce pendiente
+  // puede perderse: escribís el título, tocás rápido un par de opciones de
+  // formato (arcoíris, tipografía...) y volvés atrás antes de que pasen los
+  // 450ms: como n.title en memoria seguía vacío, la nota entera se borraba
+  // por "nunca tocada", perdiendo también los colores/tipografía elegidos.
+  function syncCurrentNoteFields(){
+    const n = notes.find(x => x.id === currentId);
+    if(!n) return null;
+    pruneEmptyMarks();
+    n.title = titleEl.textContent;
+    n.body = bodyEl.innerHTML;
+    return n;
+  }
+
+  function closeEditor(){
+    clearTimeout(saveTimer);
+    // limpiar notas vacías nunca tocadas
+    const n = syncCurrentNoteFields();
+    if(n && !n.title.trim() && !plainText(n.body)){
+      notes = notes.filter(x => x.id !== currentId);
+    }
+    persist();
+    currentId = null;
+    bodyEl.innerHTML = '';
+    bodyEl.style.paddingBottom = '';
+    document.getElementById('formatBar').classList.remove('floating');
+    viewEditor.style.display = 'none';
+    viewList.style.display = 'flex';
+    render();
+  }
+
+  function saveNow(){
+    clearTimeout(saveTimer);
+    const n = syncCurrentNoteFields();
+    if(!n) return;
+    n.updatedAt = Date.now();
+    persist();
+    flashSaved();
+  }
+
+  function scheduleSave(){
+    pushHistoryDebounced();
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>{
+      const n = syncCurrentNoteFields();
+      if(!n) return;
+      n.updatedAt = Date.now();
+      persist();
+      flashSaved();
+    }, 450);
+  }
+
+  function flashSaved(msg){
+    saveFlag.textContent = msg || 'consignado';
+    saveFlag.classList.add('show');
+    clearTimeout(flagTimer);
+    flagTimer = setTimeout(()=> saveFlag.classList.remove('show'), 1200);
+  }
+
+  // Modo "sigo escribiendo resaltado": arma/desarma el resaltado para lo
+  // próximo que el usuario tipee. No interceptamos el tipeo letra por letra
+  // (eso rompía el orden con el teclado predictivo/autocorrección de
+  // Android); en cambio solo movemos el cursor adentro o afuera de una
+  // marca vacía, y dejamos que el navegador tipee de forma 100% nativa.
+  let typingHighlightArmed = false;
+
+  function closestMark(node){
+    while(node && node !== bodyEl){
+      if(node.nodeType === 1 && node.classList && node.classList.contains('comment-mark')) return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  // Botoncito "Nota" dentro de cada resaltado: es contenteditable="false"
+  // (una isla atómica dentro del editor, como una mención), así que el
+  // teclado/backspace/flechas lo tratan como una sola unidad y no rompe
+  // la edición del texto resaltado que lo rodea.
+  function ensureNoteButton(mark){
+    let btn = mark.querySelector(':scope > .comment-note-btn');
+    if(!btn){
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'comment-note-btn';
+      btn.setAttribute('contenteditable', 'false');
+      btn.textContent = 'Nota';
+      mark.appendChild(btn);
+    }
+    mark.classList.toggle('has-note', !!(mark.dataset.note && mark.dataset.note.trim()));
+    return btn;
+  }
+
+  function attachNoteButtons(){
+    bodyEl.querySelectorAll('.comment-mark').forEach(ensureNoteButton);
+  }
+
+  let activeNoteMark = null;
+  const noteModal = document.getElementById('noteModal');
+  const noteTextarea = document.getElementById('noteTextarea');
+
+  function openNotePanel(mark){
+    if(!mark) return;
+    activeNoteMark = mark;
+    noteTextarea.value = mark.dataset.note || '';
+    document.getElementById('noteDelete').style.display = mark.dataset.note ? '' : 'none';
+    noteModal.classList.add('show');
+    setTimeout(() => noteTextarea.focus(), 50);
+  }
+
+  function closeNotePanel(){
+    noteModal.classList.remove('show');
+    activeNoteMark = null;
+  }
+
+  function saveNotePanel(){
+    if(!activeNoteMark) return;
+    const text = noteTextarea.value.trim();
+    if(text){
+      activeNoteMark.dataset.note = text;
+    }else{
+      delete activeNoteMark.dataset.note;
+    }
+    activeNoteMark.classList.toggle('has-note', !!text);
+    closeNotePanel();
+    scheduleSave();
+  }
+
+  function deleteNotePanel(){
+    if(!activeNoteMark) return;
+    delete activeNoteMark.dataset.note;
+    activeNoteMark.classList.remove('has-note');
+    closeNotePanel();
+    scheduleSave();
+  }
+
+  function currentCaretNode(){
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return null;
+    return sel.getRangeAt(0).startContainer;
+  }
+
+  function isCommentActive(){
+    return typingHighlightArmed || !!closestMark(currentCaretNode());
+  }
+
+  function updateFormatState(){
+    document.querySelectorAll('[data-cmd]').forEach(btn => {
+      try{
+        btn.classList.toggle('active', document.queryCommandState(btn.dataset.cmd));
+      }catch(e){}
+    });
+    const commentBtn = document.getElementById('commentBtn');
+    if(commentBtn){
+      const on = isCommentActive();
+      commentBtn.classList.toggle('active', on);
+      commentBtn.textContent = on ? 'Guardar' : 'Comentar...';
+    }
+  }
+
+  function unwrapMark(markEl){
+    const noteBtn = markEl.querySelector(':scope > .comment-note-btn');
+    if(noteBtn) noteBtn.remove();
+    const parent = markEl.parentNode;
+    const nextSibling = markEl.nextSibling;
+    const movedNodes = [];
+    while(markEl.firstChild){
+      const child = markEl.firstChild;
+      parent.insertBefore(child, markEl);
+      movedNodes.push(child);
+    }
+    parent.removeChild(markEl);
+
+    // Dejamos el cursor colapsado (sin nada seleccionado) justo después de
+    // lo que acabamos de des-resaltar. Si queda una selección real activa,
+    // Android la pinta con su propio color nativo, que mezclado con el
+    // fondo oscuro de la app se ve como un parche amarillento.
+    const sel = window.getSelection();
+    const r2 = document.createRange();
+    if(movedNodes.length){
+      const last = movedNodes[movedNodes.length - 1];
+      if(last.nodeType === 3){
+        r2.setStart(last, last.length);
+      }else{
+        r2.selectNodeContents(last);
+        r2.collapse(false);
+      }
+    }else if(nextSibling){
+      r2.setStartBefore(nextSibling);
+    }else{
+      r2.selectNodeContents(parent);
+      r2.collapse(false);
+    }
+    r2.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r2);
+  }
+
+  function wrapSelectionInMark(range){
+    const mark = document.createElement('span');
+    mark.className = 'comment-mark';
+    mark.appendChild(range.extractContents());
+    range.insertNode(mark);
+    ensureNoteButton(mark);
+    // Cursor colapsado al final de la marca, no la dejamos "seleccionada"
+    // (mismo motivo que en unwrapMark).
+    const sel = window.getSelection();
+    const r2 = document.createRange();
+    r2.selectNodeContents(mark);
+    r2.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(r2);
+  }
+
+  const RAINBOW_GRADIENT = 'linear-gradient(90deg,#ff2079,#c026d3,#7b2ff7,#4d3dff,#00e5ff,#00ffc8,#39ff14,#b6ff00,#faed27,#ffb700,#ff9d00,#ff3131,#ff2079)';
+
+  // ---- Arcoíris de LETRA del título, pintado con spans reales ----
+  // Antes esto se hacía con el truco de "background-clip:text" +
+  // texto transparente sobre todo el elemento. Ese combo (sumado al
+  // overflow-x:auto para poder desplazar títulos largos) hacía que
+  // algunos WebViews de Android dejaran de tratar el título como
+  // scrolleable con el dedo. La solución de fondo (arcoíris de fondo,
+  // que usa "background-clip:border-box") nunca tuvo ese problema
+  // porque no toca el color de la letra. Acá pintamos cada letra con
+  // su propio span de color SÓLIDO -sin recortes ni transparencias-,
+  // igual que ya se hace con el arcoíris del cuerpo, y así el scroll
+  // del título queda exactamente igual que con cualquier otro color.
+  const RAINBOW_STOPS = ['#ff2079','#c026d3','#7b2ff7','#4d3dff','#00e5ff','#00ffc8','#39ff14','#b6ff00','#faed27','#ffb700','#ff9d00','#ff3131','#ff2079'];
+
+  function hexToRgb(hex){
+    const h = hex.replace('#','');
+    return [parseInt(h.substring(0,2),16), parseInt(h.substring(2,4),16), parseInt(h.substring(4,6),16)];
+  }
+  function rgbToHex(r,g,b){
+    return '#' + [r,g,b].map(v => Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
+  }
+  function rainbowColorAt(t){
+    const segCount = RAINBOW_STOPS.length - 1;
+    const pos = Math.min(1, Math.max(0, t)) * segCount;
+    let idx = Math.floor(pos);
+    if(idx >= segCount) idx = segCount - 1;
+    const localT = pos - idx;
+    const c1 = hexToRgb(RAINBOW_STOPS[idx]);
+    const c2 = hexToRgb(RAINBOW_STOPS[idx + 1]);
+    return rgbToHex(
+      c1[0] + (c2[0] - c1[0]) * localT,
+      c1[1] + (c2[1] - c1[1]) * localT,
+      c1[2] + (c2[2] - c1[2]) * localT
+    );
+  }
+  function escapeHtmlChar(ch){
+    if(ch === '&') return '&amp;';
+    if(ch === '<') return '&lt;';
+    if(ch === '>') return '&gt;';
+    return ch;
+  }
+  function buildTitleRainbowHTML(text){
+    const chars = [...text];
+    const n = chars.length;
+    if(n === 0) return '';
+    return chars.map((ch, i) => {
+      const t = n === 1 ? 0 : i / (n - 1);
+      return `<span style="color:${rainbowColorAt(t)}">${escapeHtmlChar(ch)}</span>`;
+    }).join('');
+  }
+  // Cuenta cuántos caracteres hay antes del cursor, para poder
+  // reubicarlo en el mismo lugar después de reconstruir los spans.
+  function getCaretCharOffset(el){
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return null;
+    const range = sel.getRangeAt(0);
+    if(!el.contains(range.startContainer)) return null;
+    const pre = document.createRange();
+    pre.selectNodeContents(el);
+    pre.setEnd(range.startContainer, range.startOffset);
+    return pre.toString().length;
+  }
+  function setCaretCharOffset(el, offset){
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+    let node, count = 0, targetNode = null, targetOffset = 0;
+    while((node = walker.nextNode())){
+      const next = count + node.textContent.length;
+      if(offset <= next){
+        targetNode = node;
+        targetOffset = offset - count;
+        break;
+      }
+      count = next;
+      targetNode = node;
+      targetOffset = node.textContent.length;
+    }
+    if(!targetNode) return;
+    const range = document.createRange();
+    range.setStart(targetNode, targetOffset);
+    range.collapse(true);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  function renderTitleRainbow(){
+    const text = titleEl.textContent;
+    const focused = document.activeElement === titleEl;
+    const offset = focused ? getCaretCharOffset(titleEl) : null;
+    titleEl.innerHTML = buildTitleRainbowHTML(text);
+    if(focused && offset !== null) setCaretCharOffset(titleEl, offset);
+  }
+  // Saca los spans de color por letra y deja el título como un solo
+  // nodo de texto plano (para cuando se pasa a un color sólido).
+  function flattenTitleToPlainText(){
+    const focused = document.activeElement === titleEl;
+    const offset = focused ? getCaretCharOffset(titleEl) : null;
+    titleEl.textContent = titleEl.textContent;
+    if(focused && offset !== null) setCaretCharOffset(titleEl, offset);
+  }
+
+  function pruneEmptyMarks(){
+    // Saca marcas de resaltado que quedaron vacías (armadas pero nunca
+    // usadas para escribir nada), salvo la que tiene el cursor adentro
+    // en este momento.
+    const sel = window.getSelection();
+    const liveNode = sel && sel.rangeCount ? sel.getRangeAt(0).startContainer : null;
+    bodyEl.querySelectorAll('.comment-mark').forEach(mark => {
+      const noteBtn = mark.querySelector(':scope > .comment-note-btn');
+      const stripped = (noteBtn ? mark.textContent.slice(0, -noteBtn.textContent.length) : mark.textContent)
+        .replace(/\u200B/g, '');
+      if(stripped === '' && !mark.contains(liveNode)){
+        mark.parentNode.removeChild(mark);
+      }
+    });
+    attachNoteButtons();
+  }
+
+  function armTypingHighlight(range){
+    const mark = document.createElement('span');
+    mark.className = 'comment-mark';
+    const textNode = document.createTextNode('\u200B');
+    mark.appendChild(textNode);
+    range.insertNode(mark);
+    const sel = window.getSelection();
+    const r2 = document.createRange();
+    r2.setStart(textNode, 1);
+    r2.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r2);
+    typingHighlightArmed = true;
+  }
+
+  function exitMarkAtCaret(mark){
+    // Coloca el cursor justo después de la marca, afuera de ella, para que
+    // lo próximo que se tipee salga sin resaltado.
+    const marker = document.createTextNode('\u200B');
+    if(mark.nextSibling){
+      mark.parentNode.insertBefore(marker, mark.nextSibling);
+    }else{
+      mark.parentNode.appendChild(marker);
+    }
+    const sel = window.getSelection();
+    const r2 = document.createRange();
+    r2.setStart(marker, 1);
+    r2.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r2);
+    pruneEmptyMarks();
+  }
+
+  function toggleComment(){
+    bodyEl.focus();
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+
+    if(!range.collapsed){
+      // Hay texto seleccionado: resaltamos u des-resaltamos justo esa selección.
+      const startMark = closestMark(range.startContainer);
+      const endMark = closestMark(range.endContainer);
+      if(startMark && startMark === endMark){
+        unwrapMark(startMark);
+      }else{
+        wrapSelectionInMark(range);
+      }
+      typingHighlightArmed = false;
+    }else{
+      // Sin selección: prendemos o apagamos el modo "sigo escribiendo resaltado".
+      const mark = closestMark(range.startContainer);
+      if(mark){
+        typingHighlightArmed = false;
+        exitMarkAtCaret(mark);
+      }else{
+        armTypingHighlight(range);
+      }
+    }
+    updateFormatState();
+    scheduleSave();
+  }
+
+  function disarmOnNavigation(){
+    if(typingHighlightArmed && !closestMark(currentCaretNode())){
+      typingHighlightArmed = false;
+      updateFormatState();
+    }
+  }
+
+  function burnNote(){
+    const burnedId = currentId;
+    notes = notes.filter(x => x.id !== currentId);
+    persist();
+    syncDeleteNote(burnedId);
+    burnModal.classList.remove('show');
+    currentId = null;
+    viewEditor.style.display = 'none';
+    viewList.style.display = 'flex';
+    render();
+  }
+
+  function closeAllItemMenus(){
+    document.querySelectorAll('.item-menu.show').forEach(m => m.classList.remove('show'));
+  }
+
+  function shareNote(id){
+    const n = notes.find(x => x.id === id);
+    if(!n) return;
+    const title = n.title.trim() || 'Sin título';
+    const text = plainText(n.body);
+    if(navigator.share){
+      navigator.share({ title, text }).catch(()=>{});
+    }else if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(title + '\n\n' + text).then(()=>{
+        alert('Este navegador no permite compartir directo, así que copié el registro al portapapeles.');
+      }).catch(()=>{
+        alert('No se pudo compartir ni copiar en este navegador.');
+      });
+    }else{
+      alert('Este navegador no permite compartir directo.');
+    }
+  }
+
+  function requestDeleteNote(id){
+    pendingDeleteId = id;
+    itemDeleteModal.classList.add('show');
+  }
+
+  function confirmDeleteNote(){
+    if(!pendingDeleteId) return;
+    const deletedId = pendingDeleteId;
+    notes = notes.filter(x => x.id !== pendingDeleteId);
+    persist();
+    syncDeleteNote(deletedId);
+    pendingDeleteId = null;
+    itemDeleteModal.classList.remove('show');
+    render();
+  }
+
+  function exportBackup(){
+    const blob = new Blob([JSON.stringify(notes, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bitacora-apocrifa-backup.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importBackup(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const data = JSON.parse(reader.result);
+        if(!Array.isArray(data)) throw new Error('formato inválido');
+        const existingIds = new Set(notes.map(n=>n.id));
+        data.forEach(n => {
+          if(n && n.id && !existingIds.has(n.id)){
+            notes.push({
+              id:n.id, title:n.title||'', body:n.body||'',
+              createdAt:n.createdAt||Date.now(), updatedAt:n.updatedAt||Date.now()
+            });
+          }
+        });
+        persist();
+        render();
+      }catch(e){
+        alert('No se pudo leer esa copia. Verificá el archivo.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function copyForWord(){
+    const titleText = titleEl.textContent.trim();
+    const bodyClone = bodyEl.cloneNode(true);
+    bodyClone.querySelectorAll('.comment-note-btn').forEach(b => b.remove());
+    const inlined = bodyClone.innerHTML.replace(
+      /<span class="comment-mark"[^>]*>/g,
+      '<span style="background:#a9c9d6;color:#1c3540;border-radius:2px;padding:0.03em 0.15em;">'
+    );
+    const bodyHtml = `<p>${inlined.replace(/<br\s*\/?>/gi, '</p><p>')}</p>`;
+    const html = (titleText ? `<h2>${escapeHtml(titleText)}</h2>` : '') + bodyHtml;
+
+    const clone = document.createElement('div');
+    clone.innerHTML = bodyClone.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+    const text = (titleText ? titleText + '\n\n' : '') + (clone.textContent || '');
+
+    const finish = () => flashSaved('copiado');
+    const fail = () => {
+      // Recordamos qué estaba enfocado (título o cuerpo) antes de este
+      // método de respaldo, porque el truco del textarea oculto SÍ mueve
+      // el foco a propósito (hace falta para poder seleccionarlo y
+      // copiarlo) y eso bajaría la barra flotante de golpe. Al terminar,
+      // devolvemos el foco a donde estaba para que la barra no se mueva.
+      const previouslyFocused = document.activeElement;
+      const shouldRestoreFocus = previouslyFocused === bodyEl || previouslyFocused === titleEl;
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        if(shouldRestoreFocus) previouslyFocused.focus();
+        finish();
+      }catch(e){
+        if(shouldRestoreFocus) previouslyFocused.focus();
+        alert('No se pudo copiar automáticamente. Seleccioná el texto a mano.');
+      }
+    };
+
+    if(navigator.clipboard && window.ClipboardItem){
+      try{
+        const item = new ClipboardItem({
+          'text/html': new Blob([html], {type:'text/html'}),
+          'text/plain': new Blob([text], {type:'text/plain'})
+        });
+        navigator.clipboard.write([item]).then(finish).catch(fail);
+      }catch(e){ fail(); }
+    } else if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(finish).catch(fail);
+    } else {
+      fail();
+    }
+  }
+
+  // eventos
+  listEl.addEventListener('click', e => {
+    const menuBtn = e.target.closest('.item-menu-btn');
+    if(menuBtn){
+      e.stopPropagation();
+      const id = menuBtn.dataset.menuToggle;
+      const menu = listEl.querySelector(`.item-menu[data-menu="${id}"]`);
+      const wasOpen = menu && menu.classList.contains('show');
+      closeAllItemMenus();
+      if(menu && !wasOpen) menu.classList.add('show');
+      return;
+    }
+    const option = e.target.closest('.item-menu-option');
+    if(option){
+      e.stopPropagation();
+      const id = option.dataset.id;
+      const action = option.dataset.action;
+      closeAllItemMenus();
+      if(action === 'share') shareNote(id);
+      if(action === 'delete') requestDeleteNote(id);
+      return;
+    }
+    const item = e.target.closest('.note-item');
+    if(item) openNote(item.dataset.id);
+  });
+  document.addEventListener('click', e => {
+    if(!e.target.closest('.item-menu-btn') && !e.target.closest('.item-menu')){
+      closeAllItemMenus();
+    }
+  });
+  document.getElementById('fabAdd').addEventListener('click', newNote);
+
+  // Línea con destello que sale del botón + al escrolear la lista hacia
+  // abajo -puramente decorativo, para darle un toque más prolijo-.
+  (function(){
+    const list = document.getElementById('list');
+    const scanLine = document.getElementById('fabScanLine');
+    if(!list || !scanLine) return;
+    let lastScrollTop = list.scrollTop;
+    let scanHideTimer = null;
+    list.addEventListener('scroll', () => {
+      const st = list.scrollTop;
+      const goingDown = st > lastScrollTop + 2;
+      lastScrollTop = st;
+      if(!goingDown) return;
+      // Sacamos y volvemos a poner la clase (con un reflow forzado en
+      // el medio) para que el destello se vea de nuevo aunque ya
+      // estuviera corriendo la animación de una vuelta anterior.
+      scanLine.classList.remove('active');
+      void scanLine.offsetWidth;
+      scanLine.classList.add('active');
+      clearTimeout(scanHideTimer);
+      scanHideTimer = setTimeout(() => scanLine.classList.remove('active'), 1050);
+    }, {passive:true});
+  })();
+
+  searchEl.addEventListener('input', render);
+  titleEl.addEventListener('input', () => {
+    const n = notes.find(x => x.id === currentId);
+    if(n && n.titleColor === 'rainbow') renderTitleRainbow();
+    scheduleSave();
+  });
+  titleEl.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      bodyEl.focus();
+    }
+  });
+  // Pegar como texto plano: al ser contenteditable, un paste con formato
+  // (por ejemplo copiando de otra nota) podría meter <div>/<br> internos.
+  titleEl.addEventListener('paste', e => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain').replace(/[\r\n]+/g, ' ');
+    document.execCommand('insertText', false, text);
+  });
+  bodyEl.addEventListener('input', () => { scheduleSave(); });
+
+  // ---- Pinch-to-zoom (solo dentro del área de escritura) ----
+  (function setupPinchZoom(){
+    const MIN_SIZE = 0.75, MAX_SIZE = 2.6; // rem
+    const ZOOM_KEY = 'bitacora_apocrifa_bodyzoom';
+    let pinchActive = false;
+    let startDist = 0;
+    let startSize = 1;
+
+    function currentSize(){
+      const stored = parseFloat(localStorage.getItem(ZOOM_KEY));
+      if(!isNaN(stored)) return stored;
+      const cs = parseFloat(getComputedStyle(bodyEl).fontSize);
+      return cs / 16; // px -> rem aprox
+    }
+    function applySize(remValue){
+      bodyEl.style.fontSize = remValue + 'rem';
+      localStorage.setItem(ZOOM_KEY, remValue.toFixed(3));
+    }
+    // Aplicar tamaño guardado al cargar
+    applySize(currentSize());
+
+    function dist(touches){
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.hypot(dx, dy);
+    }
+
+    bodyEl.addEventListener('touchstart', e => {
+      if(e.touches.length === 2){
+        pinchActive = true;
+        startDist = dist(e.touches);
+        startSize = currentSize();
+      }
+    }, {passive:true});
+
+    bodyEl.addEventListener('touchmove', e => {
+      if(pinchActive && e.touches.length === 2){
+        e.preventDefault();
+        const newDist = dist(e.touches);
+        if(startDist > 0){
+          const ratio = newDist / startDist;
+          let newSize = startSize * ratio;
+          newSize = Math.min(MAX_SIZE, Math.max(MIN_SIZE, newSize));
+          applySize(newSize);
+        }
+      }
+    }, {passive:false});
+
+    function endPinch(e){
+      if(e.touches.length < 2) pinchActive = false;
+    }
+    bodyEl.addEventListener('touchend', endPinch);
+    bodyEl.addEventListener('touchcancel', endPinch);
+
+    // Salvaguarda extra: si el navegador fuerza el zoom nativo por accesibilidad,
+    // bloqueamos cualquier gesto de 2 dedos fuera del cuadro de texto.
+    document.addEventListener('touchmove', e => {
+      if(e.touches.length > 1 && !bodyEl.contains(e.target)){
+        e.preventDefault();
+      }
+    }, {passive:false});
+  })();
+
+  bodyEl.addEventListener('keyup', e => {
+    if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key)){
+      disarmOnNavigation();
+    }
+    updateFormatState();
+  });
+  bodyEl.addEventListener('mouseup', () => { disarmOnNavigation(); updateFormatState(); });
+  bodyEl.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      document.execCommand('insertLineBreak');
+    }
+  });
+  document.querySelectorAll('.format-btn[data-cmd]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      bodyEl.focus();
+      document.execCommand(btn.dataset.cmd);
+      updateFormatState();
+      scheduleSave();
+    });
+  });
+  // ---------- barra flotante arriba del teclado ----------
+  // El meta "interactive-widget=resizes-content" solo lo respeta Chrome/Android.
+  // En iOS Safari (y otros) el teclado no reacomoda el layout viewport, así que
+  // un position:fixed;bottom:0 a secas queda mal ubicado (tapado por el teclado
+  // o saltando arriba de todo). Usamos la VisualViewport API para calcular a
+  // mano cuánto espacio ocupa el teclado y empujar la barra justo por encima.
+  const formatBarEl = document.getElementById('formatBar');
+  let hideFloatTimeout = null;
+  const vv = window.visualViewport;
+  // Margen de solape: mejor pisar de más el teclado que dejar un hueco.
+  // Los eventos "resize"/"scroll" del visualViewport llegan con la posición
+  // YA actualizada, pero durante la animación de apertura/cierre del
+  // teclado pueden llegar más lento que el movimiento visual real (sobre
+  // todo en WebViews embebidos, no Chrome completo) -y en algunos de esos
+  // WebViews (como el navegador interno de algunos gestores de archivos)
+  // la altura que reporta visualViewport queda corta de forma persistente
+  // incluso con el teclado ya asentado, no solo durante la animación. Por
+  // eso el margen es generoso: es preferible que la barra tape un pelín
+  // el borde de arriba del teclado a que se vea un hilito de la nota por
+  // el medio.
+  const KEYBOARD_OVERLAP_PX = 22;
+  // Por debajo de este umbral no consideramos que "hay teclado": al
+  // enfocar un campo (incluso por el autoenfoque al abrir la nota) pasa
+  // un instante antes de que el teclado real empiece a taparlo. Si
+  // activábamos "floating" apenas se enfocaba, la barra saltaba de golpe
+  // a la posición flotante (bottom:0, pegada al borde de abajo) un
+  // instante antes de que hiciera falta, e incluso quedaba así sin razón
+  // en contextos sin teclado (por ejemplo el autoenfoque al abrir la
+  // nota, o al probar el archivo en una compu sin teclado táctil).
+  const KEYBOARD_SHOW_THRESHOLD_PX = 24;
+  let keyboardTrackRaf = null;
+  let keyboardTrackUntil = 0;
+  // Altura de referencia "sin teclado". La necesitamos porque hay DOS
+  // comportamientos distintos según el navegador/WebView:
+  //  (A) el más común: al abrir el teclado, window.innerHeight NO cambia
+  //      (el layout viewport se queda como si nada), y es SOLO el
+  //      visualViewport el que se achica. Ahí "keyboardCoveragePx()" ya
+  //      detecta bien la diferencia.
+  //  (B) algunos navegadores/WebViews SÍ respetan el meta
+  //      "interactive-widget=resizes-content" y achican directamente
+  //      window.innerHeight junto con el teclado. En ese caso el
+  //      visualViewport queda IGUAL que el layout viewport (la resta da
+  //      0 todo el tiempo) y "keyboardCoveragePx()" nunca detecta nada,
+  //      aunque la barra en realidad no necesita ningún corrimiento extra
+  //      (bottom:0 ya queda pegada arriba del teclado solo).
+  // Para no depender de adivinar cuál de los dos es este dispositivo,
+  // guardamos la altura "de referencia" apenas se enfoca un campo (antes
+  // de que el teclado tenga chance de aparecer) y comparamos contra eso
+  // para decidir si ACTIVAR el modo flotante, sin importar cuál de los
+  // dos casos sea.
+  let heightBeforeKeyboard = window.innerHeight;
+
+  function keyboardCoveragePx(){
+    if(!vv) return 0;
+    return Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+  }
+
+  // Cuánto se "comió" el teclado del layout viewport en sí (caso B de
+  // arriba). Si esto es mayor a 0, el navegador ya reacomodó todo solo.
+  function layoutShrinkPx(){
+    return Math.max(0, heightBeforeKeyboard - window.innerHeight);
+  }
+
+  function keyboardLikelyOpen(){
+    return keyboardCoveragePx() >= KEYBOARD_SHOW_THRESHOLD_PX || layoutShrinkPx() >= KEYBOARD_SHOW_THRESHOLD_PX;
+  }
+
+  function positionFloatingBar(){
+    if(!formatBarEl.classList.contains('floating')) return;
+    if(vv){
+      // Espacio "tapado" entre el borde inferior del viewport visual y el
+      // del viewport de layout: eso es, a grandes rasgos, el teclado.
+      const covered = keyboardCoveragePx();
+      const bottomPx = covered > 0 ? Math.ceil(covered) - KEYBOARD_OVERLAP_PX : 0;
+      formatBarEl.style.bottom = Math.max(0, bottomPx) + 'px';
+    }else{
+      formatBarEl.style.bottom = '0px';
+    }
+  }
+
+  // Persigue al teclado cuadro a cuadro (en vez de solo en los eventos
+  // puntuales) durante la ventana de tiempo en que se está animando,
+  // para que la barra quede "pegada" en todo momento y no salte al final.
+  // También es quien decide, recién cuando el teclado ya está realmente
+  // tapando algo, activar el modo flotante.
+  function trackKeyboardMotion(durationMs){
+    keyboardTrackUntil = Math.max(keyboardTrackUntil, performance.now() + durationMs);
+    if(keyboardTrackRaf) return;
+    const step = () => {
+      activateFloatingIfKeyboardVisible();
+      positionFloatingBar();
+      updateBodyPadding();
+      if(performance.now() < keyboardTrackUntil){
+        keyboardTrackRaf = requestAnimationFrame(step);
+      }else{
+        keyboardTrackRaf = null;
+      }
+    };
+    keyboardTrackRaf = requestAnimationFrame(step);
+  }
+
+  // Además del seguimiento cuadro a cuadro (para la animación de apertura),
+  // mantenemos una revisión de baja frecuencia mientras la barra sigue
+  // flotando. En algunos WebViews el teclado cambia de alto un rato
+  // después de haberse asentado (por ejemplo cuando Gboard agrega o saca
+  // su tira de sugerencias/autocorrección al empezar a tipear), y esos
+  // cambios no siempre llegan como evento de "resize" del visualViewport.
+  // Este chequeo periódico corrige cualquier desfase sin gastar batería
+  // como haría un requestAnimationFrame continuo.
+  let keyboardPollInterval = null;
+  function startKeyboardPoll(){
+    if(keyboardPollInterval) return;
+    keyboardPollInterval = setInterval(() => {
+      if(!formatBarEl.classList.contains('floating')){
+        stopKeyboardPoll();
+        return;
+      }
+      positionFloatingBar();
+      updateBodyPadding();
+    }, 600);
+  }
+  function stopKeyboardPoll(){
+    clearInterval(keyboardPollInterval);
+    keyboardPollInterval = null;
+  }
+
+  function updateBodyPadding(){
+    if(formatBarEl.classList.contains('floating')){
+      bodyEl.style.paddingBottom = (formatBarEl.offsetHeight + 16) + 'px';
+    }else{
+      bodyEl.style.paddingBottom = '';
+    }
+  }
+
+  // Activa el modo flotante SOLO si: (a) seguimos en un campo editable, y
+  // (b) el teclado ya está realmente cubriendo una franja de pantalla (o,
+  // en los navegadores que reacomodan el layout viewport solos, ya se
+  // achicó la pantalla disponible). Enfocar un campo por sí solo (por
+  // ejemplo el autoenfoque al abrir una nota) ya NO alcanza para que la
+  // barra salte arriba.
+  // A pedido tuyo: además de que la barra suba sola cuando aparece el
+  // teclado, agregamos un botón para subirla o bajarla vos a mano,
+  // cuando quieras -sin depender de tocar el teclado-. Esto resultó
+  // molesto: con el auto-flote activado, con solo tocar en cualquier
+  // parte de la nota para escribir, la barra saltaba abajo aunque no la
+  // hubieras pedido. Así que lo sacamos del todo -de ahora en más la
+  // barra SOLO se mueve cuando tocás el botón, nunca sola-.
+  let barManualUp = false;   // pedida arriba (no flotando), aunque haya teclado
+  let barManualDown = false; // pedida abajo (flotando), aunque no haya teclado/foco
+
+  function activateFloatingIfKeyboardVisible(){
+    // Desactivado a pedido: la barra ya no se mueve sola con el
+    // teclado, solo con el botón (ver barPinBtn más abajo).
+    return;
+  }
+
+    function showFloatingBar(){
+    clearTimeout(hideFloatTimeout);
+    // Apenas se enfoca el campo (todavía sin teclado real en pantalla)
+    // guardamos la altura "de referencia" para poder notar más tarde si
+    // el navegador achicó window.innerHeight solo por su cuenta (ver el
+    // comentario grande de arriba, caso B).
+    heightBeforeKeyboard = window.innerHeight;
+    // Ya no agregamos la clase "floating" acá directamente: la agrega
+    // activateFloatingIfKeyboardVisible en cuanto detecte que el teclado
+    // real apareció (ver el comentario de arriba). Acá solo arrancamos
+    // el seguimiento cuadro a cuadro para pescar ese momento apenas
+    // ocurra.
+    activateFloatingIfKeyboardVisible();
+    // La apertura del teclado tarda ~250-350ms en animar en la mayoría de
+    // los dispositivos; seguimos de cerca ese tramo con margen de sobra.
+    trackKeyboardMotion(500);
+  }
+
+  function hideFloatingBarDeferred(){
+    clearTimeout(hideFloatTimeout);
+    hideFloatTimeout = setTimeout(() => {
+      if(barManualDown) return;
+      const active = document.activeElement;
+      const stillEditing = active === bodyEl || active === titleEl || formatBarEl.contains(active);
+      if(!stillEditing){
+        formatBarEl.classList.remove('floating');
+        formatBarEl.style.bottom = '';
+        bodyEl.style.paddingBottom = '';
+        stopKeyboardPoll();
+        // Al dejar de editar, el teclado ya cerró (o está por cerrar):
+        // refrescamos la altura de referencia para la próxima vez.
+        heightBeforeKeyboard = window.innerHeight;
+      }
+    }, 150);
+  }
+
+  if(vv){
+    // El teclado se abre/cierra de forma animada: 'resize' y 'scroll' del
+    // visualViewport se disparan durante toda la transición, así que
+    // reposicionamos en cada evento para que la barra "siga" al teclado
+    // en vez de saltar de golpe al final. Además, cada evento reinicia el
+    // seguimiento cuadro a cuadro por si la animación sigue en curso.
+    vv.addEventListener('resize', () => { activateFloatingIfKeyboardVisible(); positionFloatingBar(); updateBodyPadding(); trackKeyboardMotion(400); });
+    vv.addEventListener('scroll', () => { activateFloatingIfKeyboardVisible(); positionFloatingBar(); trackKeyboardMotion(400); });
+  }
+  // Algunos navegadores/WebViews (caso B de arriba) avisan el cambio de
+  // teclado por acá, moviendo directo window.innerHeight, en vez de (o
+  // además de) por el visualViewport.
+  window.addEventListener('resize', () => {
+    activateFloatingIfKeyboardVisible();
+    if(!formatBarEl.classList.contains('floating')){
+      // Sin teclado en danza: aprovechamos para refrescar la referencia
+      // (cubre rotaciones de pantalla, cambios de barra del navegador, etc).
+      heightBeforeKeyboard = window.innerHeight;
+    }
+  });
+
+  titleEl.addEventListener('focus', showFloatingBar);
+  titleEl.addEventListener('focus', () => { lastFocusTarget = 'title'; });
+  titleEl.addEventListener('blur', hideFloatingBarDeferred);
+  bodyEl.addEventListener('focus', showFloatingBar);
+  bodyEl.addEventListener('focus', () => { lastFocusTarget = 'body'; });
+  bodyEl.addEventListener('blur', hideFloatingBarDeferred);
+
+  // ---- Scroll horizontal manual del título ----
+  // El "touch-action:pan-x" y el overflow-x:auto nativos dejan de andar
+  // para el gesto de arrastre cuando el título tiene el color de LETRA en
+  // arcoíris (-webkit-text-fill-color:transparent + -webkit-background-
+  // clip:text): en Chrome/Android ese combo hace que el navegador ya no
+  // trate el cuadro como "scrolleable" con el dedo (el scroll con fondo
+  // arcoíris sí funciona porque ahí no se toca text-fill-color). Para no
+  // depender de ese comportamiento nativo, movemos scrollLeft a mano.
+  (function(){
+    let touchId = null, startX = 0, startY = 0, startScrollLeft = 0;
+    let decided = false, isHorizontalDrag = false;
+
+    titleEl.addEventListener('touchstart', e => {
+      if(e.touches.length !== 1) return;
+      const t = e.touches[0];
+      touchId = t.identifier;
+      startX = t.clientX;
+      startY = t.clientY;
+      startScrollLeft = titleEl.scrollLeft;
+      decided = false;
+      isHorizontalDrag = false;
+    }, {passive:true});
+
+    titleEl.addEventListener('touchmove', e => {
+      const t = [...e.touches].find(x => x.identifier === touchId);
+      if(!t) return;
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      if(!decided){
+        // recién decidimos si es arrastre horizontal o un toque/scroll
+        // vertical de la página una vez que se movió lo suficiente, para
+        // no comerse los toques cortos (posicionar cursor, selección).
+        if(Math.abs(dx) > 6 || Math.abs(dy) > 6){
+          decided = true;
+          isHorizontalDrag = Math.abs(dx) > Math.abs(dy);
+        }
+      }
+      if(decided && isHorizontalDrag){
+        e.preventDefault();
+        titleEl.scrollLeft = startScrollLeft - dx;
+      }
+    }, {passive:false});
+
+    function endTitleDrag(e){
+      const stillThere = [...e.touches].some(x => x.identifier === touchId);
+      if(!stillThere){ touchId = null; decided = false; isHorizontalDrag = false; }
+    }
+    titleEl.addEventListener('touchend', endTitleDrag);
+    titleEl.addEventListener('touchcancel', endTitleDrag);
+  })();
+
+  const barPinBtn = document.getElementById('barPinBtn');
+  function updateBarPinButton(){
+    const isDown = formatBarEl.classList.contains('floating');
+    barPinBtn.classList.toggle('pinned-down', isDown);
+    barPinBtn.title = isDown ? 'Subir la barra de herramientas' : 'Bajar la barra de herramientas';
+  }
+  barPinBtn.addEventListener('mousedown', e => e.preventDefault());
+  barPinBtn.addEventListener('click', () => {
+    const isDown = formatBarEl.classList.contains('floating');
+    if(isDown){
+      barManualDown = false;
+      barManualUp = true;
+      formatBarEl.classList.remove('floating');
+      formatBarEl.style.bottom = '';
+      bodyEl.style.paddingBottom = '';
+      stopKeyboardPoll();
+    }else{
+      barManualUp = false;
+      barManualDown = true;
+      formatBarEl.classList.add('floating');
+      positionFloatingBar();
+      updateBodyPadding();
+    }
+    updateBarPinButton();
+  });
+  updateBarPinButton();
+  formatBarEl.addEventListener('focusin', showFloatingBar);
+  formatBarEl.addEventListener('focusout', hideFloatingBarDeferred);
+
+
+  // Control de scroll rápido: una "manija" flotante al costado del cuerpo
+  // de la nota (igual que la de Word) para saltar rápido en textos largos.
+  const scrollThumb = document.getElementById('scrollThumb');
+  const bodyWrapEl = document.querySelector('.note-body-wrap');
+  let thumbHideTimeout = null;
+  let thumbDragging = false;
+
+  function isBodyScrollable(){
+    return (bodyEl.scrollHeight - bodyEl.clientHeight) > 40;
+  }
+
+  function positionThumb(){
+    if(!isBodyScrollable()){
+      scrollThumb.classList.remove('visible');
+      return;
+    }
+    const trackH = bodyWrapEl.clientHeight - scrollThumb.offsetHeight;
+    const scrollable = bodyEl.scrollHeight - bodyEl.clientHeight;
+    const ratio = scrollable > 0 ? (bodyEl.scrollTop / scrollable) : 0;
+    const y = Math.max(0, Math.min(trackH, ratio * trackH));
+    scrollThumb.style.transform = `translateY(${y}px)`;
+  }
+
+  function showThumb(){
+    if(!isBodyScrollable()) return;
+    positionThumb();
+    scrollThumb.classList.add('visible');
+    clearTimeout(thumbHideTimeout);
+    if(!thumbDragging){
+      thumbHideTimeout = setTimeout(() => scrollThumb.classList.remove('visible'), 1100);
+    }
+  }
+
+  bodyEl.addEventListener('scroll', showThumb, {passive:true});
+  bodyEl.addEventListener('input', () => requestAnimationFrame(positionThumb));
+  window.addEventListener('resize', () => requestAnimationFrame(positionThumb));
+
+  function dragToRatio(clientY){
+    const rect = bodyWrapEl.getBoundingClientRect();
+    const trackH = bodyWrapEl.clientHeight - scrollThumb.offsetHeight;
+    const half = scrollThumb.offsetHeight / 2;
+    const ratio = trackH > 0 ? Math.max(0, Math.min(1, (clientY - rect.top - half) / trackH)) : 0;
+    const scrollable = bodyEl.scrollHeight - bodyEl.clientHeight;
+    bodyEl.scrollTop = ratio * scrollable;
+    positionThumb();
+  }
+
+  scrollThumb.addEventListener('pointerdown', e => {
+    if(!isBodyScrollable()) return;
+    e.preventDefault();
+    thumbDragging = true;
+    clearTimeout(thumbHideTimeout);
+    scrollThumb.classList.add('dragging', 'visible');
+    scrollThumb.setPointerCapture(e.pointerId);
+  });
+  scrollThumb.addEventListener('pointermove', e => {
+    if(!thumbDragging) return;
+    e.preventDefault();
+    dragToRatio(e.clientY);
+  });
+  function endThumbDrag(e){
+    if(!thumbDragging) return;
+    thumbDragging = false;
+    scrollThumb.classList.remove('dragging');
+    thumbHideTimeout = setTimeout(() => scrollThumb.classList.remove('visible'), 1100);
+  }
+  scrollThumb.addEventListener('pointerup', endThumbDrag);
+  scrollThumb.addEventListener('pointercancel', endThumbDrag);
+
+  document.getElementById('undoBtn').addEventListener('click', () => {
+    doUndo();
+  });
+  document.getElementById('redoBtn').addEventListener('click', () => {
+    doRedo();
+  });
+  document.getElementById('commentBtn').addEventListener('click', toggleComment);
+
+  // Guardamos la última selección hecha adentro de noteBody como respaldo,
+  // por si algún navegador la llegara a perder igual.
+  let savedRange = null;
+  document.addEventListener('selectionchange', () => {
+    // Mientras hay un menú desplegable de la barra de formato abierto
+    // (por ejemplo el de colores), NO dejamos que esto pise el rango
+    // que ya guardamos al abrirlo. En algunos celulares, con el menú
+    // abierto y el teclado/el cuerpo perdiendo el foco, el navegador
+    // dispara igual un "selectionchange" que colapsa la selección -y
+    // si lo dejábamos pasar acá, se perdía el texto seleccionado
+    // justo antes de llegar a tocar el color, así que el botón parecía
+    // no hacer nada (o agarraba a veces sí, a veces no, según lo
+    // rápido que tocaras).
+    if(document.querySelector('.fb-dd-menu.fb-dd-menu-open')) return;
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    if(bodyEl.contains(range.commonAncestorContainer)){
+      savedRange = range.cloneRange();
+    }
+  });
+
+  // A pedido tuyo: cuando seleccionás texto de verdad (arrastrando el
+  // dedo) en el cuerpo de la nota, escondemos el teclado para que
+  // tengas más pantalla para ver el texto. "inputmode=none" le dice al
+  // navegador que no hace falta mostrar el teclado, SIN sacarte el
+  // foco ni la selección -así el menú nativo de Cortar/Copiar/Seleccionar
+  // todo sigue funcionando igual-. Apenas volvés a tocar para dejar el
+  // cursor en un solo punto (selección colapsada), se lo devolvemos.
+  document.addEventListener('selectionchange', () => {
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    if(!bodyEl.contains(range.commonAncestorContainer)) return;
+    if(!range.collapsed){
+      bodyEl.setAttribute('inputmode', 'none');
+    }else{
+      bodyEl.removeAttribute('inputmode');
+    }
+  });
+  function captureSelectionNow(){
+    const sel = window.getSelection();
+    if(sel && sel.rangeCount && bodyEl.contains(sel.getRangeAt(0).commonAncestorContainer)){
+      savedRange = sel.getRangeAt(0).cloneRange();
+    }
+  }
+  function restoreSelection(){
+    if(!savedRange || !bodyEl.contains(savedRange.commonAncestorContainer)) return false;
+    bodyEl.focus();
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedRange);
+    return true;
+  }
+  function convertFontSizeStamps(px){
+    bodyEl.querySelectorAll('font[size="7"]').forEach(f => {
+      f.removeAttribute('size');
+      f.style.fontSize = px + 'px';
+    });
+  }
+  let pendingFontSizePx = null;
+  bodyEl.addEventListener('input', () => {
+    if(pendingFontSizePx) convertFontSizeStamps(pendingFontSizePx);
+  });
+  function fontFamilyLabelFor(value){
+    if(!value) return 'Tipo';
+    const items = document.querySelectorAll('#fontFamilyMenu .fb-dd-item');
+    for(const item of items){
+      if(item.dataset.value === value) return item.textContent.trim();
+    }
+    return 'Tipo';
+  }
+  function applyFontFamily(value){
+    if(!value) return;
+    if(lastFocusTarget === 'title'){
+      // El título se trata como una sola pieza (igual que sus colores de
+      // letra/fondo), no por selección parcial de texto.
+      titleEl.style.fontFamily = value;
+      const n = notes.find(x => x.id === currentId);
+      if(n) n.titleFont = value;
+      scheduleSave();
+      return;
+    }
+    if(!restoreSelection()) return;
+    document.execCommand('fontName', false, value);
+    scheduleSave();
+  }
+  function applyFontSize(px){
+    if(!px || !restoreSelection()) return;
+    // Truco clásico: execCommand('fontSize') solo admite la escala legada
+    // 1-7, así que aplicamos un tamaño "sello" (7) y después reemplazamos
+    // los <font size="7"> resultantes por el tamaño real en CSS.
+    // Si no había texto seleccionado (cursor solo), el navegador recién crea
+    // la etiqueta cuando empezás a tipear, así que dejamos la conversión
+    // pendiente para el próximo evento "input" también.
+    document.execCommand('fontSize', false, '7');
+    pendingFontSizePx = px;
+    convertFontSizeStamps(px);
+    scheduleSave();
+  }
+
+  // Arcoíris a bandas: en vez de intentar un degradé "de verdad" con
+  // trucos de CSS (background-clip:text) o de encontrar/reemplazar algo
+  // después de aplicarlo, dividimos el texto seleccionado en franjas y le
+  // aplicamos a cada franja un color sólido con el MISMO execCommand
+  // (foreColor/hiliteColor) que ya confirmaste que funciona siempre. No
+  // hace falta adivinar ni buscar nada: cada franja se pinta con la
+  // operación de toda la vida, nomás repetida varias veces.
+  //
+  // Vamos de la ÚLTIMA franja hacia la PRIMERA a propósito: pintar una
+  // franja parte/reemplaza el nodo de texto de ahí en más, así que si
+  // fuéramos de adelante para atrás, las franjas que faltan procesar
+  // quedarían apuntando a un nodo que ya no existe. Yendo de atrás para
+  // adelante, lo que queda sin pintar (antes de la franja actual) nunca
+  // se toca, así que sigue siendo válido para la siguiente vuelta.
+  const RAINBOW_PALETTE = ['#c026d3', '#7b2ff7', '#4d3dff', '#00e5ff', '#00ffc8', '#39ff14', '#b6ff00', '#faed27', '#ffb700', '#ff9d00', '#ff3131', '#ff2079'];
+
+  // Estilos del degradé de verdad (letra y fondo), en un solo lugar para
+  // que tanto "escribir con arcoíris activado" como "pintar una selección"
+  // usen exactamente el mismo look.
+  const RAINBOW_FG_STYLE = `background:${RAINBOW_GRADIENT};-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;-webkit-text-stroke:0;text-stroke:0;filter:saturate(1.6) brightness(1.25) drop-shadow(0 0 5px rgba(255,255,255,0.5));`;
+  const RAINBOW_BG_STYLE = `background:${RAINBOW_GRADIENT};filter:saturate(1.6) brightness(1.15);box-shadow:0 0 10px rgba(255,255,255,0.35);border-radius:2px;`;
+
+  // "Arcoíris mientras escribís": modo aparte para cuando el usuario
+  // activa el arcoíris SIN tener texto seleccionado (como hace con los
+  // demás colores: elegir el color y después tipear). En ese caso no hay
+  // nada que dividir en franjas todavía, así que en vez de fallar
+  // coloreamos cada letra nueva a medida que se escribe, cíclicamente.
+  let rainbowTyping = null; // null (apagado) o {kind:'fg'|'bg', wrapper}
+
+  function stopRainbowTyping(){
+    rainbowTyping = null;
+  }
+
+  // Antes esto pintaba cada letra nueva con un color sólido de una
+  // paleta de 6, cíclicamente -por diseño eso da bandas de color, nunca
+  // un degradé difuminado, por más prolijo que salga el resto-.
+  //
+  // Ahora, en vez de pintar letra por letra, dejamos un único <span>
+  // vacío con el degradé ya puesto justo en la posición del cursor,
+  // y confiamos en el comportamiento normal de un campo editable: lo
+  // que se tipea con el cursor adentro de un elemento se sigue
+  // escribiendo adentro de ESE elemento. Como el degradé de fondo
+  // (background-clip:text) se recalcula solo sobre el ancho real del
+  // span, a medida que escribís el span crece y el arcoíris fluye con
+  // vos en tiempo real -es el mismo truco que ya usa el título-.
+  // Deja el cursor "escribiendo adentro" de un elemento con el estilo
+  // indicado (o sin estilo ninguno, para "normal"). Es el MISMO truco
+  // para los tres casos -arcoíris, color sólido, o volver a lo
+  // normal-: antes, para color sólido y para "normal" seguíamos
+  // confiando en que el navegador (execCommand) se acordara solo de
+  // qué tenías que tipear después; tu prueba mostró que a veces no se
+  // acuerda -seguía saliendo el color anterior por más que apretaras
+  // otro botón-. Haciéndolo siempre a mano, con nuestro propio
+  // elemento, no dependemos de que el navegador "se acuerde" de nada.
+  function startTypingWithStyle(kind, styleAttr, isRainbow){
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    if(!range.collapsed) return;
+
+    const wrapper = document.createElement('span');
+    if(styleAttr) wrapper.setAttribute('style', styleAttr);
+    if(isRainbow) wrapper.setAttribute('data-rainbow', kind);
+    // Un espacio de ancho cero le da al span algo "adentro" donde
+    // apoyar el cursor. Es invisible, no afecta el texto ni el ancho.
+    const zwsp = document.createTextNode('\u200B');
+    wrapper.appendChild(zwsp);
+    range.insertNode(wrapper);
+
+    const caret = document.createRange();
+    caret.setStart(zwsp, 1);
+    caret.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(caret);
+
+    rainbowTyping = {kind, wrapper};
+  }
+
+  function startRainbowTyping(kind){
+    startTypingWithStyle(kind, kind === 'fg' ? RAINBOW_FG_STYLE : RAINBOW_BG_STYLE, true);
+  }
+
+  // Si el usuario se va del cuerpo de la nota (cambia de nota, toca el
+  // título, etc.), apagamos el modo para que no quede "pegado" y
+  // coloreando cosas donde no corresponde.
+  bodyEl.addEventListener('blur', stopRainbowTyping);
+
+  function getTextNodesInRange(range){
+    // En vez de compareBoundaryPoints (semántica fácil de confundir) o
+    // intersectsNode (no soportado en todos los navegadores viejos),
+    // juntamos todos los nodos de texto del cuerpo en orden y usamos
+    // indexOf directo sobre range.startContainer/endContainer -que ya
+    // son referencias concretas que tenemos- para saber cuáles caen
+    // adentro. Simple e inequívoco.
+    const allTextNodes = [];
+    const walker = document.createTreeWalker(bodyEl, NodeFilter.SHOW_TEXT);
+    let n;
+    while((n = walker.nextNode())) allTextNodes.push(n);
+    if(!allTextNodes.length) return [];
+
+    let startIdx = allTextNodes.indexOf(range.startContainer);
+    let endIdx = allTextNodes.indexOf(range.endContainer);
+
+    // Si el borde de la selección cae justo en un elemento (no en un
+    // nodo de texto), buscamos el primer/último nodo de texto real
+    // dentro de ese elemento como respaldo.
+    if(startIdx === -1){
+      startIdx = allTextNodes.findIndex(t => range.startContainer.contains && range.startContainer.contains(t));
+      if(startIdx === -1) startIdx = 0;
+    }
+    if(endIdx === -1){
+      for(let i = allTextNodes.length - 1; i >= 0; i--){
+        if(range.endContainer.contains && range.endContainer.contains(allTextNodes[i])){ endIdx = i; break; }
+      }
+      if(endIdx === -1) endIdx = allTextNodes.length - 1;
+    }
+    if(startIdx > endIdx) return [];
+    return allTextNodes.slice(startIdx, endIdx + 1);
+  }
+
+  function showRainbowDebugToast(msg){
+    // Herramienta de diagnóstico ya desactivada -era temporal, para ver
+    // en pantalla si el arcoíris fallaba con algo imprevisto mientras
+    // arreglábamos esto. Se deja la función vacía (en vez de borrar
+    // todos los llamados desparramados) para no romper nada.
+    return;
+  }
+
+  // Le saca a UN elemento puntual el estilo de arcoíris que le hubiéramos
+  // puesto (letra o fondo), sin sacar el elemento en sí del árbol. Esto es
+  // clave: si en cambio lo desenvolviéramos (sacar el <span> y dejar sus
+  // hijos sueltos), cualquier selección que ya estuviera apuntando a ese
+  // elemento como límite quedaría rota. Tocando solo el "style", el
+  // elemento sigue estando ahí, la selección sigue siendo válida, y el
+  // texto queda como un span "neutro" listo para recibir el color nuevo.
+  function stripRainbowStyle(el, kind){
+    if(kind === 'fg'){
+      el.style.removeProperty('background');
+      el.style.removeProperty('background-image');
+      el.style.removeProperty('-webkit-background-clip');
+      el.style.removeProperty('background-clip');
+      el.style.removeProperty('color');
+      el.style.removeProperty('-webkit-text-fill-color');
+      el.style.removeProperty('-webkit-text-stroke');
+      el.style.removeProperty('filter');
+    }else{
+      el.style.removeProperty('background');
+      el.style.removeProperty('background-image');
+      el.style.removeProperty('background-color');
+      el.style.removeProperty('filter');
+      el.style.removeProperty('box-shadow');
+      el.style.removeProperty('border-radius');
+    }
+    el.removeAttribute('data-rainbow');
+    if(!el.getAttribute('style')) el.removeAttribute('style');
+  }
+
+  // Antes de aplicar CUALQUIER color nuevo (sólido, "sin color", o
+  // arcoíris de nuevo) sobre una selección, primero limpiamos el arcoíris
+  // que hubiera quedado puesto ahí antes -tanto si el envoltorio del
+  // arcoíris es ANCESTRO de la selección (elegiste solo una parte de un
+  // texto ya arcoíris) como si cae ADENTRO de ella (la selección abarca
+  // uno o más tramos en arcoíris).
+  //
+  // Esto es lo que faltaba: antes, elegir un color nuevo (o "sin color")
+  // encima de texto en arcoíris no hacía nada visible, porque el color
+  // nuevo quedaba puesto DENTRO de un elemento que seguía teniendo
+  // "-webkit-text-fill-color:transparent" (letra) o el degradé de fondo
+  // (fondo) -y esas dos propiedades ganan por encima de cualquier cosa
+  // que se le agregue adentro, tapando el cambio nuevo. Al limpiarlas
+  // primero, el color que elijas después queda realmente visible.
+  function clearRainbowStylesInRange(kind, range){
+    // OJO: esto SOLO debe actuar cuando hay una selección de texto de
+    // verdad (el usuario resaltó algo con la intención de cambiarle el
+    // color). Si el rango está colapsado -el cursor apoyado en algún
+    // lado, sin nada resaltado- NO tocamos nada: si el cursor
+    // simplemente cae adentro de un tramo que ya escribiste en
+    // arcoíris (para seguir editando ahí, por ejemplo), no hay que
+    // borrarle el estilo a TODO el tramo solo porque el cursor pasó por
+    // encima. Eso era justo lo que te estaba borrando el trabajo ya
+    // hecho.
+    if(!range || range.collapsed) return;
+    if(!bodyEl.contains(range.commonAncestorContainer)) return;
+    try{
+      let node = range.commonAncestorContainer;
+      if(node.nodeType === 3) node = node.parentNode;
+      let anc = node;
+      while(anc && anc !== bodyEl && anc.nodeType === 1){
+        if(anc.matches && anc.matches(`[data-rainbow="${kind}"]`)) stripRainbowStyle(anc, kind);
+        anc = anc.parentNode;
+      }
+      bodyEl.querySelectorAll(`[data-rainbow="${kind}"]`).forEach(el => {
+        if(range.intersectsNode && range.intersectsNode(el)) stripRainbowStyle(el, kind);
+      });
+    }catch(err){
+      // Si algo salió raro acá, mejor no insistir y seguir de largo con
+      // el color nuevo: es preferible dejar un resto de arcoíris viejo
+      // sin limpiar que arriesgarse a romper el texto.
+    }
+  }
+
+  // Dejar el cursor "después" de un elemento con un simple límite de
+  // Range (setStartAfter) no alcanza de forma confiable en este
+  // navegador: a veces sigue tratando lo próximo que tipeás como si
+  // estuviera adentro del elemento de al lado -eso era lo que hacía
+  // que, después de pintar una selección, siguieras escribiendo con el
+  // mismo color puesto-. Insertamos un carácter invisible SUELTO -sin
+  // ningún span alrededor- justo después del elemento, y apoyamos el
+  // cursor ahí adentro: así no hay ambigüedad posible sobre dónde
+  // "vive" lo próximo que escribas.
+  function placeCollapsedCursorAfter(el){
+    const sel = window.getSelection();
+    if(!sel || !el || !el.parentNode) return;
+    const anchor = document.createTextNode('\u200B');
+    el.parentNode.insertBefore(anchor, el.nextSibling);
+    const r = document.createRange();
+    r.setStart(anchor, 1);
+    r.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+
+  // BUGFIX: Range.extractContents() tiene un atajo nativo: si la
+  // selección entera cae DENTRO de un mismo nodo de texto (por ejemplo,
+  // todo o parte del contenido de un <span> ya pintado), el navegador
+  // extrae solo las letras sueltas -SIN clonar el span que las
+  // envuelve-. El span original (con su color/fondo, incluido el
+  // "color:transparent" del arcoíris de letra) se queda vivo en el DOM
+  // como padre del punto de inserción, y lo que insertemos ahí adentro
+  // HEREDA ese estilo -por eso un fondo gris nuevo mostraba letras
+  // invisibles: el gris se ve porque background-color no se hereda,
+  // pero el texto sí hereda el color transparente del arcoíris viejo
+  // que nunca llegamos a limpiar-.
+  //
+  // Solución: si detectamos ese caso puntual, partimos el padre
+  // estilado a mano en "antes" / "selección" / "después" ANTES de
+  // llamar a extractContents, dejando la selección como texto suelto,
+  // sin ningún ancestro con estilo del que heredar nada raro.
+  function isolateStyledAncestor(range){
+    if(!range || range.collapsed) return;
+    const textNode = range.startContainer;
+    if(range.endContainer !== textNode || textNode.nodeType !== 3) return;
+    const parent = textNode.parentNode;
+    if(!parent || parent === bodyEl || parent.nodeType !== 1) return;
+    const hasStyling = parent.hasAttribute('data-rainbow') ||
+      (parent.style && (parent.style.color || parent.style.background ||
+        parent.style.backgroundColor || parent.style.backgroundImage ||
+        parent.style.webkitTextFillColor));
+    if(!hasStyling) return;
+
+    const fullText = textNode.data;
+    const startOff = range.startOffset, endOff = range.endOffset;
+    const before = fullText.slice(0, startOff);
+    const middle = fullText.slice(startOff, endOff);
+    const after = fullText.slice(endOff);
+    if(!middle) return;
+
+    const grandparent = parent.parentNode;
+    if(!grandparent) return;
+    // OJO: el pedazo "seleccionado" (middle) queda como texto SUELTO,
+    // sin ningún span alrededor -a propósito-. Probamos antes clonarle
+    // el estilo del padre para no "perderlo", pero eso disparaba el
+    // MISMO atajo de extractContents una segunda vez (ahora sobre el
+    // clon), dejando otra vez un ancestro estilado fantasma envolviendo
+    // lo nuevo -el mismo bug, un nivel más adentro-. La preservación
+    // del estilo del otro tipo (letra/fondo) ya la maneja aparte
+    // findEnclosingKindStyle, ANTES de llamar a esta función, así que
+    // acá alcanza con sacar el texto limpio y listo.
+    const middleNode = document.createTextNode(middle);
+
+    if(before){
+      const beforeClone = parent.cloneNode(false);
+      beforeClone.textContent = before;
+      grandparent.insertBefore(beforeClone, parent);
+    }
+    grandparent.insertBefore(middleNode, parent);
+    if(after){
+      const afterClone = parent.cloneNode(false);
+      afterClone.textContent = after;
+      grandparent.insertBefore(afterClone, parent);
+    }
+    grandparent.removeChild(parent);
+
+    range.setStart(middleNode, 0);
+    range.setEnd(middleNode, middle.length);
+  }
+
+  // Antes de tocar nada, nos fijamos si TODA la selección ya está
+  // adentro de un único elemento con estilo del OTRO tipo (por ejemplo,
+  // vas a aplicar fondo y toda la selección ya está en arcoíris de
+  // letra). Si es así, lo recordamos para combinarlo con lo nuevo en
+  // vez de perderlo quando lo extraigamos.
+  function findEnclosingKindStyle(range, kind){
+    if(!range) return null;
+    let node = range.commonAncestorContainer;
+    if(node.nodeType === 3) node = node.parentNode;
+    let anc = node;
+    while(anc && anc !== bodyEl && anc.nodeType === 1){
+      const isRainbowOfKind = anc.getAttribute && anc.getAttribute('data-rainbow') === kind;
+      const hasPlainStyle = !anc.getAttribute('data-rainbow') && anc.style && (
+        kind === 'fg' ? !!anc.style.color : !!(anc.style.backgroundColor || anc.style.background)
+      );
+      if(isRainbowOfKind || hasPlainStyle){
+        return {isRainbow: isRainbowOfKind, style: anc.getAttribute('style')};
+      }
+      anc = anc.parentNode;
+    }
+    return null;
+  }
+
+  // Arma el span del tipo que se está aplicando ahora, y si había un
+  // estilo del OTRO tipo para conservar (ver findEnclosingKindStyle),
+  // lo anida en el ORDEN correcto: el FONDO siempre por AFUERA, la
+  // LETRA siempre por ADENTRO. Por qué importa el orden: el arcoíris
+  // de letra pinta su degradé "recortado" a la forma de cada letra
+  // (background-clip:text) sobre SU PROPIO fondo -si el fondo sólido
+  // quedara adentro de la letra en vez de afuera, la letra heredaría
+  // el "transparent" de afuera y el fondo sólido, al no estar
+  // recortado, la taparía entera. Puesto como corresponde -fondo
+  // afuera, letra adentro-, el fondo sólido pinta la caja completa y
+  // el degradé de letra se recorta encima, mostrando ambos a la vez.
+  function wrapKindPreservingOther(kind, frag, currentStyleAttr, currentIsRainbow, preserved){
+    const otherKind = kind === 'fg' ? 'bg' : 'fg';
+    const currentSpan = document.createElement('span');
+    if(currentStyleAttr) currentSpan.setAttribute('style', currentStyleAttr);
+    if(currentIsRainbow) currentSpan.setAttribute('data-rainbow', kind);
+
+    if(preserved){
+      const otherSpan = document.createElement('span');
+      if(preserved.style) otherSpan.setAttribute('style', preserved.style);
+      if(preserved.isRainbow) otherSpan.setAttribute('data-rainbow', otherKind);
+      if(otherKind === 'bg'){
+        currentSpan.appendChild(frag);
+        otherSpan.appendChild(currentSpan);
+        return otherSpan;
+      }else{
+        otherSpan.appendChild(frag);
+        currentSpan.appendChild(otherSpan);
+        return currentSpan;
+      }
+    }
+
+    currentSpan.appendChild(frag);
+    return currentSpan;
+  }
+
+  function applyRainbowSmooth(kind, range){
+    // Degradé de verdad (como el título): en vez de pintar con
+    // execCommand y después salir a "adivinar" con un MutationObserver
+    // qué tocó el navegador -que era el origen de los dos problemas
+    // que veníamos arrastrando-, envolvemos DIRECTAMENTE todo el
+    // contenido seleccionado en un único <span>.
+    //
+    // Por qué esto arregla las "franjas compactas": execCommand no
+    // garantiza un solo elemento resultado. Si la selección cruza más
+    // de un nodo de texto o un formato ya puesto (negrita, un color
+    // anterior, etc.), el navegador reparte el cambio en VARIOS
+    // elementos -y como cada uno recibía el degradé completo por su
+    // cuenta, se veía como el arcoíris repetido a los saltos en vez de
+    // fluyendo parejo. Envolviendo todo en un solo span, el degradé se
+    // calcula una sola vez sobre el ancho total y fluye de punta a
+    // punta sin importar cuántos nodos había adentro.
+    //
+    // Por qué esto arregla el "se traba, aparece otro color": antes
+    // dependíamos de que el MutationObserver alcanzara a registrar el
+    // cambio a tiempo (es asincrónico por naturaleza) para reemplazar
+    // el color "marca" por el degradé; si eso fallaba -algo más común
+    // en mobile-, el color marca quedaba pegado en el texto sin que
+    // nada lo reemplazara. Acá no hay marca ni detective: todo pasa en
+    // un solo paso sincrónico.
+    if(!range || range.collapsed) return false;
+    try{
+      const otherKind = kind === 'fg' ? 'bg' : 'fg';
+      // Lo buscamos ANTES de extraer nada: extractContents puede
+      // "perder" el span ancestro que lo contiene (ver
+      // isolateStyledAncestor más arriba), así que lo guardamos
+      // primero para poder reconstruirlo después, en el orden correcto.
+      const preserved = findEnclosingKindStyle(range, otherKind);
+
+      isolateStyledAncestor(range);
+      const frag = range.extractContents();
+      if(!frag || !frag.textContent) return false;
+
+      // Si adentro de lo seleccionado ya había color de letra o de
+      // fondo puesto a mano (incluido un arcoíris anterior anidado) DEL
+      // MISMO TIPO que estamos por aplicar ahora, hay que sacarlo: si
+      // no, queda por encima del degradé nuevo y lo tapa a pedazos.
+      // Del OTRO tipo no tocamos nada suelto que haya podido sobrevivir
+      // adentro del frag -si "preserved" lo encontró, lo vamos a
+      // reconstruir prolijo aparte; si no lo encontró (selección
+      // mezclada, con varios tramos del otro tipo), mejor dejar esos
+      // pedazos como estaban que arriesgarnos a romperlos.
+      frag.querySelectorAll(`[data-rainbow="${kind}"]`).forEach(el => stripRainbowStyle(el, kind));
+      frag.querySelectorAll('font,[style],[color],[bgcolor]').forEach(el => {
+        if(el.getAttribute('data-rainbow') && el.getAttribute('data-rainbow') !== kind) return;
+        if(kind === 'fg'){
+          el.style.removeProperty('color');
+          el.style.removeProperty('-webkit-text-fill-color');
+          el.removeAttribute('color');
+        }else{
+          el.style.removeProperty('background');
+          el.style.removeProperty('background-color');
+          el.removeAttribute('bgcolor');
+        }
+      });
+
+      const finalNode = wrapKindPreservingOther(
+        kind, frag, kind === 'fg' ? RAINBOW_FG_STYLE : RAINBOW_BG_STYLE, true, preserved
+      );
+      range.insertNode(finalNode);
+
+      // Dejamos el cursor como un puntito simple justo después de lo
+      // que acabamos de pintar, para poder seguir escribiendo normal.
+      placeCollapsedCursorAfter(finalNode);
+
+      return true;
+    }catch(err){
+      showRainbowDebugToast('error: ' + (err && err.message ? err.message : err));
+      return false;
+    }
+  }
+
+  // Mismo método que applyRainbowSmooth, pero para un color sólido -o
+  // directamente sin estilo, para "sin color"-. Antes esta parte usaba
+  // execCommand (hiliteColor/foreColor) sobre la selección; el problema
+  // es que execCommand solo "sabe" tocar el formato que ÉL MISMO puso
+  // antes, y sobre uno de nuestros <span> (los del arcoíris, ya
+  // limpiados) a veces directamente no hace nada -de ahí que el botón
+  // pareciera no andar-. Envolviendo el texto a mano, igual que con el
+  // arcoíris, el resultado es siempre el mismo sin importar qué había
+  // antes ahí.
+  function applySolidStyle(kind, range, colorValue){
+    if(!range || range.collapsed) return false;
+    try{
+      const otherKind = kind === 'fg' ? 'bg' : 'fg';
+      const preserved = findEnclosingKindStyle(range, otherKind);
+
+      isolateStyledAncestor(range);
+      const frag = range.extractContents();
+      if(!frag || !frag.textContent) return false;
+
+      // Igual que en applyRainbowSmooth: solo limpiamos el arcoíris del
+      // MISMO tipo que estamos por pisar, para no borrar sin querer un
+      // arcoíris de letra al aplicar solo un fondo (o viceversa) -la
+      // app tiene que poder combinar los dos-.
+      frag.querySelectorAll(`[data-rainbow="${kind}"]`).forEach(el => stripRainbowStyle(el, kind));
+      frag.querySelectorAll('font,[style],[color],[bgcolor]').forEach(el => {
+        // Mismo cuidado que en applyRainbowSmooth: no tocar el arcoíris
+        // del otro tipo que estamos preservando a propósito.
+        if(el.getAttribute('data-rainbow') && el.getAttribute('data-rainbow') !== kind) return;
+        if(kind === 'fg'){
+          el.style.removeProperty('color');
+          el.style.removeProperty('-webkit-text-fill-color');
+          el.removeAttribute('color');
+        }else{
+          el.style.removeProperty('background');
+          el.style.removeProperty('background-color');
+          el.removeAttribute('bgcolor');
+        }
+      });
+
+      // Si no hay colorValue (es "sin color"), el span del tipo actual
+      // queda sin ningún estilo propio -el texto adentro ya viene
+      // limpio por el paso de arriba-. De cualquier manera, si había
+      // un estilo del OTRO tipo para conservar, wrapKindPreservingOther
+      // se encarga de anidarlo bien.
+      const currentStyleAttr = colorValue
+        ? (kind === 'fg' ? `color:${colorValue};` : `background-color:${colorValue};`)
+        : null;
+      const wrapper = wrapKindPreservingOther(kind, frag, currentStyleAttr, false, preserved);
+      range.insertNode(wrapper);
+
+      placeCollapsedCursorAfter(wrapper);
+
+      return true;
+    }catch(err){
+      return false;
+    }
+  }
+
+  function applyRainbowBands(kind, range){
+    if(!range || range.collapsed) return false;
+
+    const totalLen = range.toString().length;
+    if(totalLen === 0) return false;
+
+    const bandCount = Math.min(RAINBOW_PALETTE.length, Math.max(2, totalLen));
+    // Cuántos caracteres le tocan a cada franja (repartidos lo más
+    // parejo posible sobre el total).
+    const bandLens = [];
+    let prevBound = 0;
+    for(let b = 1; b <= bandCount; b++){
+      const bound = Math.round(totalLen * b / bandCount);
+      bandLens.push(bound - prevBound);
+      prevBound = bound;
+    }
+
+    // "remaining" es la porción del texto que todavía nos falta pintar.
+    // Arranca siendo igual a la selección original, y la vamos achicando
+    // por el FINAL en cada vuelta (pintamos de atrás para adelante). El
+    // arranque (start) de "remaining" nunca se toca durante todo el
+    // proceso, así que sigue siendo una referencia válida siempre.
+    let remaining = range.cloneRange();
+    const sel = window.getSelection();
+    let touched = false;
+
+    for(let b = bandCount - 1; b >= 0; b--){
+      const bandLen = bandLens[b];
+      if(bandLen <= 0) continue;
+
+      // Recalculamos TODO de cero acá, con el estado actual real del
+      // DOM, en vez de confiar en offsets calculados antes de empezar
+      // (que dejan de servir apenas la primera franja parte un nodo de
+      // texto, sobre todo si la selección cruza el borde de un
+      // comentario o de otro formato ya aplicado).
+      const textNodes = getTextNodesInRange(remaining);
+      if(!textNodes.length) break;
+      const segments = textNodes.map(node => {
+        const start = (node === remaining.startContainer) ? remaining.startOffset : 0;
+        const end = (node === remaining.endContainer) ? remaining.endOffset : node.data.length;
+        return {node, start, end, len: end - start};
+      }).filter(s => s.len > 0);
+      const remLen = segments.reduce((a, s) => a + s.len, 0);
+      if(remLen <= 0) break;
+
+      function posToNodeOffset(pos){
+        let acc = 0;
+        for(const s of segments){
+          if(pos <= acc + s.len) return {node: s.node, offset: s.start + (pos - acc)};
+          acc += s.len;
+        }
+        const last = segments[segments.length - 1];
+        return {node: last.node, offset: last.end};
+      }
+
+      const splitPos = Math.max(0, remLen - bandLen);
+      const from = posToNodeOffset(splitPos);
+      const to = {node: remaining.endContainer, offset: remaining.endOffset};
+      if(from.node === to.node && from.offset === to.offset){ continue; }
+
+      const bandRange = document.createRange();
+      bandRange.setStart(from.node, from.offset);
+      bandRange.setEnd(to.node, to.offset);
+      sel.removeAllRanges();
+      sel.addRange(bandRange);
+      const color = RAINBOW_PALETTE[b % RAINBOW_PALETTE.length];
+      if(kind === 'fg'){
+        document.execCommand('foreColor', false, color);
+      }else{
+        document.execCommand('hiliteColor', false, color);
+      }
+      touched = true;
+
+      // Achicamos "remaining" para que termine justo donde arrancó esta
+      // franja. from.node/from.offset siguen siendo válidos porque
+      // quedan del lado que todavía no tocamos (el navegador corta los
+      // nodos de texto EXACTAMENTE ahí, conservando intacta la parte de
+      // "antes").
+      const newRemaining = document.createRange();
+      newRemaining.setStart(remaining.startContainer, remaining.startOffset);
+      newRemaining.setEnd(from.node, from.offset);
+      remaining = newRemaining;
+    }
+
+    // Dejamos la selección colapsada (un cursor simple, sin nada
+    // "raro" de por medio) al final de todo lo que acabamos de tocar.
+    // Usamos la selección VIVA tal cual quedó después de la última
+    // operación (no las referencias originales, que ya están gastadas
+    // por los cortes de texto que hicimos en el camino). Sin esto,
+    // sospechamos que Android puede dejar la selección en un estado
+    // confuso después de tantos cambios de rango seguidos, al punto de
+    // no dejar volver a marcar texto con el dedo hasta recargar.
+    if(sel.rangeCount){
+      try{
+        const liveRange = sel.getRangeAt(0);
+        liveRange.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(liveRange);
+      }catch(e){ /* si algo quedó raro, mejor no insistir */ }
+    }
+    return touched;
+  }
+
+  // Cuando estás escribiendo con el arcoíris activado y tocás OTRO color
+  // (o "sacar"), la intención es "de acá en más escribo distinto", no
+  // "borrame el arcoíris que ya escribí". Por eso, en vez de dejar que
+  // la limpieza de más abajo le pise el estilo al span entero -que
+  // incluiría lo ya tipeado, porque el cursor sigue technically "adentro"
+  // de él-, movemos el cursor a JUSTO DESPUÉS de ese span primero: así
+  // lo que ya está escrito en arcoíris queda intacto, y lo nuevo empieza
+  // afuera, libre para el color que elijas.
+  function exitRainbowTypingCleanly(){
+    if(!rainbowTyping) return;
+    const w = rainbowTyping.wrapper;
+    rainbowTyping = null;
+    if(!w || !w.parentNode) return;
+    // Solo actuamos si el cursor TODAVÍA está adentro (o pegado) del
+    // span donde veníamos escribiendo. Si mientras tanto ya
+    // seleccionaste otra cosa en otro lado de la nota, no la tocamos.
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return;
+    const cur = sel.getRangeAt(0);
+    if(!cur.collapsed) return;
+    if(cur.startContainer !== w && !w.contains(cur.startContainer)) return;
+    try{
+      // Insertamos un carácter invisible SUELTO -sin ningún span con
+      // estilo alrededor- justo después del recuadro del arcoíris, y
+      // paramos el cursor ahí adentro. Antes solo movíamos el LÍMITE
+      // de la selección hasta el borde del span (sin agregar nada), y
+      // en algunos navegadores eso no alcanza: siguen tratando lo
+      // próximo que tipees como si estuviera pegado al span de al
+      // lado. Con un nodo de texto propio y sin estilo, no hay
+      // ambigüedad posible: lo que escribas ahí sale limpio.
+      const anchor = document.createTextNode('\u200B');
+      w.parentNode.insertBefore(anchor, w.nextSibling);
+      const r = document.createRange();
+      r.setStart(anchor, 1);
+      r.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(r);
+      savedRange = r.cloneRange();
+    }catch(err){ /* si esto falla, mejor no insistir */ }
+  }
+
+  function applyFontColor(value){
+    // Antes acá solo se llamaba a stopRainbowTyping() (apagar la
+    // bandera). Ahora, además, sacamos el cursor de adentro del span
+    // donde veníamos escribiendo -ver el comentario de arriba-.
+    exitRainbowTypingCleanly();
+    if(!value) return;
+    if(lastFocusTarget === 'title'){
+      if(value === 'rainbow'){
+        const n = notes.find(x => x.id === currentId);
+        // Los dos arcoíris (letra y fondo) no conviven: si el fondo
+        // estaba en arcoíris, lo apagamos de forma prolija y visible en
+        // vez de dejar su botón apretado sin efecto.
+        if(n && n.titleBgColor === 'rainbow'){
+          n.titleBgColor = '';
+          document.getElementById('bgColorSwatch').style.background = '';
+          titleEl.style.background = '';
+          titleEl.style.webkitBackgroundClip = '';
+          titleEl.style.backgroundClip = '';
+          titleEl.style.filter = '';
+          titleEl.style.boxShadow = '';
+          titleEl.style.backgroundColor = '';
+        }
+        if(n) n.titleColor = 'rainbow';
+        titleEl.style.setProperty('-webkit-text-fill-color', '');
+        titleEl.style.setProperty('-webkit-text-stroke', '');
+        titleEl.style.textShadow = '';
+        titleEl.style.color = '';
+        renderTitleRainbow();
+        document.getElementById('fontColorSwatch').style.background = RAINBOW_GRADIENT;
+        scheduleSave();
+        return;
+      }
+      const n = notes.find(x => x.id === currentId);
+      if(n && n.titleColor === 'rainbow'){
+        // Sacamos los spans de color por letra y volvemos a un solo
+        // nodo de texto plano antes de aplicar el color sólido.
+        flattenTitleToPlainText();
+      }
+      titleEl.style.setProperty('-webkit-text-fill-color', '');
+      titleEl.style.setProperty('-webkit-text-stroke', '');
+      titleEl.style.textShadow = '';
+      titleEl.style.color = value;
+      if(n) n.titleColor = value;
+      document.getElementById('fontColorSwatch').style.background = value;
+      scheduleSave();
+      return;
+    }
+    if(!savedRange || !bodyEl.contains(savedRange.commonAncestorContainer)) return;
+    // Limpiamos el arcoíris viejo ACÁ, tocando solo el DOM (nada de
+    // selección todavía). Antes esto pasaba después de restoreSelection(),
+    // es decir con la selección del navegador ya "enganchada" -y mutar
+    // atributos de estilo justo con una selección viva puesta encima es,
+    // en algunos celulares, lo que hacía que el propio execCommand de
+    // después se confundiera y borrara texto en vez de solo cambiarle el
+    // color. Limpiando ANTES de tocar la selección, y recién after
+    // volviendo a pararla, el execCommand siempre corre sobre una
+    // selección fresca y un DOM ya prolijo.
+    clearRainbowStylesInRange('fg', savedRange);
+    if(value === 'rainbow'){
+      if(savedRange.collapsed){
+        if(!restoreSelection()) return;
+        // No hay texto seleccionado: activamos el modo "arcoíris
+        // mientras escribís", igual que pasa con los demás colores
+        // cuando no hay nada resaltado.
+        startRainbowTyping('fg');
+        document.getElementById('fontColorSwatch').style.background = RAINBOW_GRADIENT;
+        showRainbowDebugToast('activado para lo que escribas (letra). Andá tipeando.');
+        return;
+      }
+      stopRainbowTyping();
+      let ok = false;
+      try{
+        ok = applyRainbowSmooth('fg', savedRange);
+        if(!ok) showRainbowDebugToast('no encontró texto para pintar (fg). ¿Había algo seleccionado?');
+      }catch(err){
+        showRainbowDebugToast('error en letra: ' + (err && err.message ? err.message : err));
+      }
+      if(ok){ document.getElementById('fontColorSwatch').style.background = RAINBOW_GRADIENT; scheduleSave(); }
+      return;
+    }
+    stopRainbowTyping();
+    if(savedRange.collapsed){
+      // No hay nada seleccionado: dejamos el cursor "escribiendo
+      // adentro" de un elemento con este color -no dependemos de que
+      // el navegador se acuerde solo-.
+      if(!restoreSelection()) return;
+      startTypingWithStyle('fg', `color:${value};`, false);
+      document.getElementById('fontColorSwatch').style.background = value;
+      scheduleSave();
+      return;
+    }
+    // Hay una selección de verdad: lo hacemos a mano (mismo método que
+    // el arcoíris), no con execCommand.
+    let okSolid = false;
+    try{ okSolid = applySolidStyle('fg', savedRange, value); }catch(err){}
+    if(okSolid){
+      document.getElementById('fontColorSwatch').style.background = value;
+      scheduleSave();
+    }
+  }
+
+  function applyBgColor(value){
+    // Mismo criterio que en applyFontColor: sacamos el cursor de adentro
+    // del span donde veníamos escribiendo con arcoíris ANTES de nada,
+    // para no borrar lo ya escrito.
+    exitRainbowTypingCleanly();
+    if(lastFocusTarget === 'title'){
+      if(value === 'rainbow'){
+        titleEl.style.setProperty('-webkit-text-fill-color', '');
+        titleEl.style.webkitBackgroundClip = 'border-box';
+        titleEl.style.backgroundClip = 'border-box';
+        titleEl.style.background = RAINBOW_GRADIENT;
+        titleEl.style.filter = 'saturate(1.6) brightness(1.15)';
+        titleEl.style.boxShadow = '0 0 14px rgba(255,255,255,0.35)';
+        const n = notes.find(x => x.id === currentId);
+        // Los dos arcoíris no pueden convivir. Si la letra estaba en
+        // arcoíris, la apagamos de forma prolija en vez de dejar su
+        // botón apretado sin efecto visible.
+        if(n && n.titleColor === 'rainbow'){
+          n.titleColor = '';
+          document.getElementById('fontColorSwatch').style.background = '';
+          flattenTitleToPlainText();
+          titleEl.style.color = '';
+        }
+        if(n) n.titleBgColor = 'rainbow';
+        document.getElementById('bgColorSwatch').style.background = RAINBOW_GRADIENT;
+        scheduleSave();
+        return;
+      }
+      titleEl.style.filter = '';
+      titleEl.style.boxShadow = '';
+      titleEl.style.webkitBackgroundClip = '';
+      titleEl.style.backgroundClip = '';
+      // Si venía de un fondo arcoíris, la imagen del gradiente queda
+      // colgada en el shorthand "background" y tapa cualquier color
+      // sólido que pongamos encima si no la borramos primero.
+      titleEl.style.background = '';
+      titleEl.style.backgroundColor = value || '';
+      const n = notes.find(x => x.id === currentId);
+      if(n) n.titleBgColor = value || '';
+      document.getElementById('bgColorSwatch').style.background = value || '';
+      scheduleSave();
+      return;
+    }
+    if(!savedRange || !bodyEl.contains(savedRange.commonAncestorContainer)) return;
+    clearRainbowStylesInRange('bg', savedRange);
+    if(value === 'rainbow'){
+      if(savedRange.collapsed){
+        if(!restoreSelection()) return;
+        startRainbowTyping('bg');
+        document.getElementById('bgColorSwatch').style.background = RAINBOW_GRADIENT;
+        showRainbowDebugToast('activado para lo que escribas (fondo). Andá tipeando.');
+        return;
+      }
+      stopRainbowTyping();
+      let ok = false;
+      try{
+        ok = applyRainbowSmooth('bg', savedRange);
+        if(!ok) showRainbowDebugToast('no encontró texto para pintar (bg). ¿Había algo seleccionado?');
+      }catch(err){
+        showRainbowDebugToast('error en fondo: ' + (err && err.message ? err.message : err));
+      }
+      if(ok){ document.getElementById('bgColorSwatch').style.background = RAINBOW_GRADIENT; scheduleSave(); }
+      return;
+    }
+    stopRainbowTyping();
+    if(savedRange.collapsed){
+      if(!restoreSelection()) return;
+      startTypingWithStyle('bg', value ? `background-color:${value};` : null, false);
+      document.getElementById('bgColorSwatch').style.background = value || '';
+      scheduleSave();
+      return;
+    }
+    let okSolid = false;
+    try{ okSolid = applySolidStyle('bg', savedRange, value || null); }catch(err){}
+    if(okSolid){
+      document.getElementById('bgColorSwatch').style.background = value || '';
+      scheduleSave();
+    }
+  }
+
+  // Menús desplegables propios (no <select> nativo) para tipografía y
+  // tamaño. Usamos "mousedown" con preventDefault para que el foco (y la
+  // selección de texto) nunca se le escape a noteBody, y "click" para
+  // abrir el menú y elegir una opción de forma pareja en mouse y touch.
+  function positionFbMenu(btn, menu){
+    const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+    const r = btn.getBoundingClientRect();
+    const menuW = menu.offsetWidth || 100;
+    const menuH = menu.offsetHeight || 100;
+    // Por defecto el menú se abre hacia arriba, alineado a la izquierda del botón.
+    let left = r.left;
+    let top = r.top - menuH - 6;
+    // Si no entra hacia arriba (poco espacio), lo abrimos hacia abajo.
+    if(top < 8){
+      top = r.bottom + 6;
+    }
+    // Clampeamos siempre dentro de los límites visibles de la pantalla,
+    // usando el viewport visual real (evita que quede "flotando" en
+    // cualquier lado si justo se cerró el teclado y las medidas quedaron
+    // desactualizadas).
+    if(top + menuH > vh - 8){
+      top = Math.max(8, vh - menuH - 8);
+    }
+    if(left + menuW > vw - 8){
+      left = vw - menuW - 8;
+    }
+    left = Math.max(8, left);
+    menu.style.left = Math.round(left) + 'px';
+    menu.style.top = Math.round(top) + 'px';
+    menu.style.bottom = 'auto';
+  }
+  function setupFbDropdown(ddId, onSelect){
+    const dd = document.getElementById(ddId);
+    const btn = dd.querySelector('.fb-dd-btn');
+    const menu = dd.querySelector('.fb-dd-menu');
+    // Sacamos el menú del format-bar (que tiene overflow-x:auto y lo recorta)
+    // y lo colgamos directo del body, posicionado con JS.
+    document.body.appendChild(menu);
+    // Bloqueamos el comportamiento por defecto en TODA la superficie del
+    // menú (no solo en los botones) usando mousedown -no touchstart, para
+    // no romper el "click" táctil-: así, si el dedo toca el espacio vacío
+    // entre círculos de color, tampoco le puede robar el foco al
+    // título/cuerpo ni disparar el teclado/la barra flotante.
+    menu.addEventListener('mousedown', e => e.preventDefault());
+    const captureTarget = () => {
+      // Se ejecuta lo antes posible (touchstart, antes que mousedown/click)
+      // para ganarle a cualquier blur nativo del teclado que el toque
+      // pueda disparar antes de que corra el resto de nuestro código.
+      if(document.activeElement === titleEl) lastFocusTarget = 'title';
+      else if(document.activeElement === bodyEl) lastFocusTarget = 'body';
+      captureSelectionNow();
+    };
+    btn.addEventListener('touchstart', captureTarget, {passive:true});
+    btn.addEventListener('mousedown', e => {
+      e.preventDefault();
+      captureTarget();
+    });
+    btn.addEventListener('click', () => {
+      const willOpen = !dd.classList.contains('open');
+      document.querySelectorAll('.fb-dd.open').forEach(o => o.classList.remove('open'));
+      document.querySelectorAll('.fb-dd-menu.fb-dd-menu-open').forEach(m => m.classList.remove('fb-dd-menu-open'));
+      if(willOpen){
+        dd.classList.add('open');
+        menu.classList.add('fb-dd-menu-open');
+        positionFbMenu(btn, menu);
+        requestAnimationFrame(() => { if(dd.classList.contains('open')) positionFbMenu(btn, menu); });
+      }
+    });
+    menu.querySelectorAll('.fb-dd-item').forEach(item => {
+      item.addEventListener('mousedown', e => e.preventDefault());
+      item.addEventListener('click', () => {
+        onSelect(item.dataset.value, item.textContent.trim());
+        dd.classList.remove('open');
+        menu.classList.remove('fb-dd-menu-open');
+      });
+    });
+    window.addEventListener('resize', () => { if(dd.classList.contains('open')) positionFbMenu(btn, menu); });
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize', () => { if(dd.classList.contains('open')) positionFbMenu(btn, menu); });
+    }
+    document.addEventListener('click', e => {
+      if(!dd.contains(e.target) && !menu.contains(e.target)){
+        dd.classList.remove('open');
+        menu.classList.remove('fb-dd-menu-open');
+      }
+    });
+  }
+  setupFbDropdown('fontFamilyDD', (value, label) => {
+    applyFontFamily(value);
+    document.getElementById('fontFamilyLabel').textContent = label;
+  });
+  setupFbDropdown('fontSizeDD', (value, label) => {
+    applyFontSize(value);
+    document.getElementById('fontSizeLabel').textContent = label;
+  });
+  setupFbDropdown('fontColorDD', (value) => {
+    applyFontColor(value);
+  });
+  setupFbDropdown('bgColorDD', (value) => {
+    applyBgColor(value);
+  });
+  document.getElementById('backBtn').addEventListener('click', closeEditor);
+  // Ninguno de estos botones del encabezado (guardar, copiar, importante,
+  // quemar) debe robarle el foco al título o al cuerpo: si lo hiciera, la
+  // barra de formato flotante se "bajaría" de golpe (volviendo a su
+  // posición normal, arriba, pegada al título) aunque el teclado real
+  // siga abierto tapando la pantalla - dando la sensación de que la barra
+  // "salta" al tocar ese botón.
+  ['backBtn','saveBtn','copyBtn','importantBtn','burnBtn'].forEach(id => {
+    document.getElementById(id).addEventListener('mousedown', e => e.preventDefault());
+  });
+  document.getElementById('saveBtn').addEventListener('click', saveNow);
+  document.getElementById('copyBtn').addEventListener('click', copyForWord);
+  document.getElementById('importantBtn').addEventListener('click', () => {
+    const n = notes.find(x => x.id === currentId);
+    if(!n) return;
+    n.important = !n.important;
+    document.getElementById('importantBtn').classList.toggle('active', n.important);
+    scheduleSave();
+  });
+  document.getElementById('burnBtn').addEventListener('click', () => burnModal.classList.add('show'));
+  document.getElementById('burnCancel').addEventListener('click', () => burnModal.classList.remove('show'));
+  document.getElementById('burnConfirm').addEventListener('click', burnNote);
+  document.getElementById('itemDeleteCancel').addEventListener('click', () => {
+    pendingDeleteId = null;
+    itemDeleteModal.classList.remove('show');
+  });
+  document.getElementById('itemDeleteConfirm').addEventListener('click', confirmDeleteNote);
+
+  // Botoncito "Nota" dentro de un resaltado: abre la carilla para
+  // escribir/editar la nota de ese fragmento. preventDefault en
+  // pointerdown/mousedown evita que el toque intente meter el cursor
+  // dentro del botón (que es contenteditable="false") antes de que
+  // llegue el click.
+  bodyEl.addEventListener('pointerdown', e => {
+    if(e.target.closest('.comment-note-btn')) e.preventDefault();
+  });
+  bodyEl.addEventListener('mousedown', e => {
+    if(e.target.closest('.comment-note-btn')) e.preventDefault();
+  });
+  bodyEl.addEventListener('click', e => {
+    const btn = e.target.closest('.comment-note-btn');
+    if(!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openNotePanel(btn.closest('.comment-mark'));
+  });
+  document.getElementById('noteCancel').addEventListener('click', closeNotePanel);
+  document.getElementById('noteDelete').addEventListener('click', deleteNotePanel);
+  document.getElementById('noteSave').addEventListener('click', saveNotePanel);
+  document.getElementById('exportBtn').addEventListener('click', exportBackup);
+  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', e => {
+    if(e.target.files[0]) importBackup(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  const iconMoon = document.getElementById('iconMoon');
+  const iconSun = document.getElementById('iconSun');
+  function setThemeIcon(light){
+    iconMoon.classList.toggle('icon-visible', !light);
+    iconSun.classList.toggle('icon-visible', light);
+  }
+  // Estos botones se pueden tocar mientras estás escribiendo (con el
+  // teclado abierto). Sin este freno, el toque les roba el foco al título
+  // o al cuerpo, el teclado se cierra de golpe y la barra flotante
+  // "salta" a su posición normal (arriba, debajo del título) en vez de
+  // quedarse donde estaba. preventDefault en pointerdown evita que el
+  // botón tome el foco, así el teclado y la barra quedan como estaban.
+  ['themeToggle', 'saveBtn', 'copyBtn'].forEach(id => {
+    document.getElementById(id).addEventListener('pointerdown', e => e.preventDefault());
+  });
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const light = document.body.classList.toggle('theme-light');
+    setThemeIcon(light);
+    localStorage.setItem(THEME_KEY, light ? 'light' : 'dark');
+  });
+  if(localStorage.getItem(THEME_KEY) === 'light'){
+    document.body.classList.add('theme-light');
+    setThemeIcon(true);
+  }
+
+  load();
+  render();
+  syncPull(); // trae notas nuevas de otros dispositivos, si hay conexión
+})();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+</script>
+</body>
+</html>
